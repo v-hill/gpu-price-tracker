@@ -22,7 +22,6 @@ json
 os
 pandas >= 1.0.5
 re
-re
 selenium >= 3.141.0
 time
 toml >= 0.10.1
