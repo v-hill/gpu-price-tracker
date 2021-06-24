@@ -1,7 +1,7 @@
 title = "Setup TOML"
 
 [paths]
-chromedriver = ""
+chromedriver = "C:/....."
 database = "gpu_db.json"
 
 [driver_options]
@@ -19,3 +19,4 @@ oldest = "2021-01-01"
 
 [filters]
 accepted_substrings = [ "GTX", "RTX",]
+always_accept = [ "2080", "3060", "3070", "3080", "3090",]
