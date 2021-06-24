@@ -38,6 +38,14 @@ class Database():
         self.products = []
 
     def to_dict(self):
+        """
+        Create a dictionary representation of the Database for saving to json.
+
+        Returns
+        -------
+        dict_out : dict
+            Dictionary of Database instance.
+        """
         dict_out = {}
         dict_out['collected'] = [prod.to_dict()
                                  for prod in self.products if prod.data_collected]
@@ -65,22 +73,25 @@ class Database():
                 json.dump(new_data, fout, indent=4, sort_keys=False)
                 return 1
 
-        new_data_c = new_data['collected']
-        new_data_uc = new_data['uncollected']
-        existing_db_c = existing_db['collected']
-        existing_db_uc = existing_db['uncollected']
+        # print(f'current database: {len(existing_db["collected"])} collected, '
+        #       f'{len(existing_db["uncollected"])} uncollected')
+        new_db_c = existing_db['collected']
+        existing_db_c_names = [e['name'] for e in existing_db['collected']]
+        for entry in new_data['collected']:
+            if entry['name'] not in existing_db_c_names:
+                new_db_c.append(entry)
 
-        new_db_c = existing_db_c + new_data_c
         new_db_uc = []
-
-        new_data_uc_names = [e['name'] for e in new_data_uc]
-        for entry in existing_db_uc:
+        new_data_uc_names = [e['name'] for e in new_data['uncollected']]
+        for entry in existing_db['uncollected']:
             if entry['name'] in new_data_uc_names:
                 new_db_uc.append(entry)
 
         new_db = {'collected': new_db_c,
                   'uncollected': new_db_uc}
 
+        # print(f'new database: {len(new_db["collected"])} collected, '
+        #       f'{len(new_db["uncollected"])} uncollected')
         with open(conf['paths']['database'], 'w') as fout:
             json.dump(new_db, fout, indent=4, sort_keys=False)
 
