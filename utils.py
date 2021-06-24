@@ -34,3 +34,26 @@ def too_old(conf, data_items):
         # print(f'    oldest: {oldest_sale}, limit: {date_limit}') # For debug
         return True
     return False
+
+
+def check_always_accepted(name, conf):
+    """
+    Check if the GPU name contains one the always_accept filters set in the
+    configuration.toml file.
+
+    Parameters
+    ----------
+    name : str
+        GPU name
+    conf : dict
+        configuration.toml
+
+    Returns
+    -------
+    bool
+        True if GPU contains an always accepted string, else False.
+    """
+    filters = [f.lower() for f in conf['filters']['always_accept']]
+    if any(x in name.lower() for x in filters):
+        return True
+    return False
