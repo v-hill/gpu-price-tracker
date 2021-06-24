@@ -21,6 +21,14 @@ class EBayItem:
         return repr_string
 
     def to_dict(self):
+        """
+        Create a dictionary representation of the EBayItem for saving to json.
+
+        Returns
+        -------
+        attrs_dict : dict
+            Dictionary of EBayItem instance.
+        """
         attrs_dict = copy.deepcopy(self.item_attributes)
         date_str = attrs_dict['date'].strftime("%Y-%m-%d %H:%M:%S")
         attrs_dict['date'] = date_str
@@ -68,14 +76,20 @@ class EBayItem:
         self.item_attributes['date'] = date_datetime
 
     def sort_price_details(self):
+        """
+        Converts price and postage info into floating point values.
+        """
         attr_dict = copy.deepcopy(self.item_attributes)
         for key in attr_dict:
+            test_val = str(attr_dict[key]).replace(',', '')
             try:
-                if "£" in str(attr_dict[key]):
-                    price_num = re.findall(r'\d*\.?\d+', attr_dict[key])[0]
+                if "£" in test_val:
+                    price_num = re.findall(r'\d*\.?\d+', test_val)[0]
                     price_num = float(price_num)
+                    if price_num <= 5:
+                        raise Exception("Price info incorrectly parsed")
                     self.item_attributes[key] = price_num
-                if "Free postage" in str(attr_dict[key]):
+                if "Free postage" in test_val:
                     price_num = float(0)
                     self.item_attributes[key] = price_num
             except BaseException:
