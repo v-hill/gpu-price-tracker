@@ -35,12 +35,22 @@ class GraphicsCard():
         data : list
             List of EBayItem objects
         """
+        print(f'    {len(data)} results added to database')
         self.data_collected = True
         self.data = data
         now = datetime.now()
         self.collection_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
     def to_dict(self):
+        """
+        Create a dictionary representation of the GraphicsCard for saving to
+        json.
+
+        Returns
+        -------
+        dict_out : dict
+            Dictionary of GraphicsCard instance.
+        """
         dict_out = {'name': self.name,
                     'data_collected': self.data_collected,
                     'collection_time': self.collection_time,
