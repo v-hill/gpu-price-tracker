@@ -35,6 +35,9 @@ class EBayItem:
         return attrs_dict
 
     def get_details(self):
+        """
+        Populate the self.item_details with a dictionay of atrributes.
+        """
         detail_class_str = "^s-item__detail s-item__detail"
         self.item_details = self.soup_tag.find_all(
             "div", {"class": re.compile(detail_class_str)})
