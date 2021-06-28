@@ -28,7 +28,6 @@ def make_database(name):
             json.dump([], fout, indent=4, sort_keys=False)
     return False
 
-
 class Database():
     """
     Class for containing and processing all of the scraped data.
@@ -96,6 +95,21 @@ class Database():
             json.dump(new_db, fout, indent=4, sort_keys=False)
 
     def check_exists(self, name, conf):
+        """
+        Test whether an entry in the json database with a given name already exists.
+
+        Parameters
+        ----------
+        name : str
+            'name' tag of new GPU entry
+        conf : dict
+            configuration.toml
+
+        Returns
+        -------
+        bool
+            True if name already in database, else False.
+        """
         # Load existing database
         with open(conf['paths']['database']) as f:
             existing_db = json.load(f)
