@@ -4,7 +4,8 @@ Main scraper executable.
 
 # Python library imports
 import toml
-from selenium.webdriver.chrome.options import Options
+import selenium.webdriver.firefox.options as firefox
+import selenium.webdriver.chrome.options as chrome
 from selenium import webdriver
 
 # Repo code imports
@@ -60,14 +61,26 @@ with open('configuration.toml', 'r') as f:
 db_exists = make_database(conf['paths']['database'])
 
 # Setup driver options
-chrome_options = Options()
-chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+if conf['browser']['chrome'] == 'True':
+    browser_options = chrome.Options()
+if conf['browser']['firefox'] == 'True':
+    browser_options = firefox.Options()
+
+browser_options.add_argument('--disable-blink-features=AutomationControlled')
 if bool(conf['driver_options']['disable_gpu']):
-    chrome_options.add_argument('--disable-gpu')  # Disable GPU
+    browser_options.add_argument('--disable-gpu')  # Disable GPU
 
 # Start webdriver
-main_driver = webdriver.Chrome(conf['paths']['chromedriver'],
-                               options=chrome_options)
+print(conf['paths']['geckodriver'])
+if conf['browser']['chrome'] == 'True':
+    main_driver = webdriver.Chrome(
+        conf['paths']['chromedriver'],
+        options=browser_options)
+if conf['browser']['firefox'] == 'True':
+    main_driver = webdriver.Firefox(
+        executable_path=conf['paths']['geckodriver'],
+        options=browser_options)
+
 
 webpage = MainWebPage(main_driver, conf)  # Create main webpage class
 webpage.auto_accept_cookies()
