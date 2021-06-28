@@ -1,7 +1,12 @@
 title = "Setup TOML"
 
+[browser]
+chrome = "False"
+firefox = "True"
+
 [paths]
-chromedriver = "C:/....."
+chromedriver = "C:/.....chromedriver.exe"
+geckodriver = "C:/.....geckodriver.exe"
 database = "gpu_db.json"
 
 [driver_options]
@@ -11,8 +16,8 @@ disable_gpu = "True"
 start_url = "https://www.ebay.co.uk/b/Computer-Graphics-Video-Cards/27386/bn_661667?LH_ItemCondition=3000&LH_PrefLoc=1&LH_Sold=1&rt=nc&_sop=13&_udlo=10"
 
 [num_results]
-min = 20
 max = 5000
+min = 20
 
 [date_limit]
 oldest = "2021-01-01"
