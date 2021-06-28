@@ -233,7 +233,7 @@ class BrandWebPage(WebPage):
 
     def get_next_page(self):
         self.get_pages()
-        for i, page in enumerate(self.pages):
+        for page in self.pages:
             if 'current' in page.label:
                 self.current_page = page
                 break
