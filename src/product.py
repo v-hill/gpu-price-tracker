@@ -3,8 +3,8 @@ Module for EBayItem class.
 """
 
 # Python library imports
-import re
 import copy
+import re
 import pandas as pd
 
 

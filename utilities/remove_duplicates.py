@@ -2,7 +2,6 @@
 Script to remove duplicate entries from the json database file.
 """
 
-# Python library imports
 import json
 import os
 

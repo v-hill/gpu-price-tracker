@@ -3,9 +3,9 @@ Module for webpage related classes.
 """
 
 # Python library imports
-from bs4 import BeautifulSoup
-import time
 import re
+import time
+from bs4 import BeautifulSoup
 
 # Repo code imports
 from product import EBayItem

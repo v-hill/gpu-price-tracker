@@ -1,17 +1,16 @@
 """
 Main scraper executable.
 """
-
 # Python library imports
-import toml
-import selenium.webdriver.firefox.options as firefox
 import selenium.webdriver.chrome.options as chrome
+import selenium.webdriver.firefox.options as firefox
+import toml
 from selenium import webdriver
 
 # Repo code imports
 from database import Database, make_database
-from webpage import MainWebPage, BrandWebPage
-from utils import too_old, check_always_accepted
+from utils import check_always_accepted, too_old
+from webpage import BrandWebPage, MainWebPage
 
 # --------------------------- Function definitions ----------------------------
 
@@ -54,7 +53,7 @@ def collect_page_data(b_webpage, verbose=False):
 
 
 # Load configuration toml
-with open('configuration.toml', 'r') as f:
+with open('src/configuration.toml', 'r') as f:
     conf = toml.load(f, _dict=dict)
 
 # Create database if one doesn't exist
