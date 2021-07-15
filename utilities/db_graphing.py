@@ -81,3 +81,60 @@ def clean_dataframe(df):
     except BaseException:
         pass
     return df
+
+
+def apply_dict_filters(df, card_dict, filter_title=True):
+    if filter_title:
+        df = df[df['Product title'].str.contains(
+            card_dict['search_term'].replace('_', ''))]
+
+    if card_dict['gb_required'] != False:
+        df = df[df['Product title'].str.contains(card_dict['gb_required'])]
+    if card_dict['gb_exclude'] != False:
+        df = df[~df['Product title'].str.contains(card_dict['gb_exclude'])]
+
+    if card_dict['new']:
+        df = df[df['Product title'].str.contains("New|new")]
+    else:
+        df = df[~df['Product title'].str.contains("New|new")]
+
+    if card_dict['super']:
+        df = df[df['Product title'].str.contains("SUPER|uper|0 s|0 S")]
+    else:
+        df = df[~df['Product title'].str.contains("SUPER|uper|0 s|0 S")]
+
+    if card_dict['ti']:
+        df = df[df['Product title'].str.contains(" TI| Ti| ti|0T|0t|-T|-t")]
+    else:
+        df = df[~df['Product title'].str.contains(" TI| Ti| ti|0T|0t|-T|-t")]
+
+    if card_dict['mini']:
+        df = df[df['Product title'].str.contains("Mini|mini")]
+    else:
+        df = df[~df['Product title'].str.contains("Mini|mini")]
+
+    if card_dict['founders']:
+        df = df[df['Product title'].str.contains("Founders|founders")]
+    else:
+        df = df[~df['Product title'].str.contains("Founders|founders")]
+
+    if card_dict['remove_outliers']:
+        df = remove_outlier(df, 'Total price')
+
+    df = df.rename(columns={"s-item__bidCount": "Bid count",
+                            "s-item__logisticsCost": "Postage price",
+                            "s-item__price": "Item price"})
+
+    df = df.drop(['POSITIVE'], axis=1)
+    df = df.drop_duplicates()
+
+    if len(df) == 0:
+        raise Exception('No data left after filters')
+    return df
+
+
+def make_weeks(start, end):
+    weeks = []
+    for week in pd.date_range(start, end, freq='W'):
+        weeks.append(week)
+    return weeks
