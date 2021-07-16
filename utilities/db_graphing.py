@@ -138,3 +138,22 @@ def make_weeks(start, end):
     for week in pd.date_range(start, end, freq='W'):
         weeks.append(week)
     return weeks
+
+
+def calc_weekly_prices(weeks, data1, verbose=True):
+    prices = []
+    dates = []
+    for i in range(len(weeks) - 1):
+        start = weeks[i]
+        end = weeks[i + 1]
+        df_temp = data1[(data1['Date'] < end) & (data1['Date'] > start)]
+        if len(df_temp) > 3:
+            mean1 = float(f"{df_temp['Total price'].mean():0.2f}")
+            stdev1 = float(f"{df_temp['Total price'].std():0.1f}")
+            if verbose:
+                print(
+                    f"{start:%Y %b %d}    {len(df_temp):5} sold    "
+                    "£{mean1:6} \u00B1 {stdev1}")
+            prices.append(mean1)
+            dates.append(start + (end - start) / 2)
+    return dates, prices
