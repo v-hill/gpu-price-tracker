@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 
 
@@ -45,7 +44,6 @@ def make_df(filepaths):
         li.append(df)
 
     frame = pd.concat(li, axis=0, ignore_index=True)
-
     frame = frame.drop_duplicates()
     frame = frame.dropna(axis='columns')
 
