@@ -11,10 +11,10 @@ def add_files(DIR, filepaths):
     return filepaths
 
 
-def find_all_filepaths():
+def find_all_filepaths(dirs):
     all_filepaths = []
-    for DIR in DIRS:
-        add_files(DIR, all_filepaths)
+    for dir in dirs:
+        add_files(dir, all_filepaths)
     return all_filepaths
 
 
