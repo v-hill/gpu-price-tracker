@@ -78,6 +78,8 @@ def get_db_index(db_new, name):
 
 
 data_directory = "C:/{your path here}"
+db_new_name = 'combined_gpu_db.json'
+
 filepaths = os.listdir(data_directory)
 filepaths = [f for f in filepaths if '.json' in f]
 filepaths = [f for f in filepaths if 'combined' not in f]
@@ -85,17 +87,14 @@ filepaths = [f for f in filepaths if 'combined' not in f]
 # Create new empty database
 db_new = {'collected': [],
           'uncollected': []}
-db_new_name = 'combined_gpu_db.json'
 with open(data_directory + db_new_name, 'w', encoding='utf-8') as fout:
     json.dump(db_new, fout, indent=4, sort_keys=False)
-
 
 # Iterate over all other json databases and combined into the
 # combined_gpu_db.json file
 for file1 in filepaths:
     print(file1)
     # Load existing combined database
-
     new_data = load_db(data_directory + file1)  # Load database to merge
     gpu_diff = get_new_gpu_names(db_new, new_data)
 
@@ -107,7 +106,6 @@ for file1 in filepaths:
             db_new['collected'].append(gpu)
         else:
             idx = get_db_index(db_new, gpu['name'])
-
             print(f'Merging data for: {gpu["name"]}')
             # print(f'    {len(gpu["data"])} new cards')
             # print(
@@ -119,12 +117,9 @@ for file1 in filepaths:
                 if already_in_db(item_new, new_entry):
                     items_removed += 1
                     continue
-
                 new_entry['data'].append(item_new)
             new_entry['num_sold'] = len(new_entry['data'])
-
             db_new['collected'][idx] = new_entry
-
             print(f'    {items_removed/(len(gpu["data"])):0.1%} '
                   'of cards not added')
     print(f'Number of GPUs in database {len(db_new["collected"])}')
