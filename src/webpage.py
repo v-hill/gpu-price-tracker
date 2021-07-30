@@ -97,16 +97,18 @@ class MainWebPage(WebPage):
             for button in soup.find_all('button'):
                 if 'see all' in button.text:
                     aria_label_text = button['aria-label']
-                    if 'GPU Model' in aria_label_text:
+                    if 'gpu model' in aria_label_text.lower():
                         # print(button.prettify()) # For debug
                         button_css = f'[aria-label="{aria_label_text}"]'
         except BaseException:
-            raise Exception("Error: No see all menu button found in page")
+            raise Exception("Error: See all menu button not found")
         if button_css != '':
             see_all_button = self.driver.find_element_by_css_selector(
                 button_css)
             see_all_button.click()
             time.sleep(2)
+        else:
+            raise Exception("Error: No see all menu button found in page")
 
     def select_option(self, product):
         """
