@@ -173,6 +173,7 @@ class BrandWebPage(WebPage):
         self.pages = []
         self.current_page = None
         self.next_page = None
+        self.num_results = None
 
     def get_number_of_results(self):
         """
@@ -209,6 +210,7 @@ class BrandWebPage(WebPage):
         if num_results >= self.conf['num_results']['max']:
             raise Exception('Too many results found, navigation to GPU page '
                             'unsuccessful')
+        self.num_results = num_results
         return num_results, True
 
     def get_pages(self):
@@ -220,15 +222,23 @@ class BrandWebPage(WebPage):
         pagination = soup.find('div', {'class': 'b-pagination'})
         try:
             options = pagination.find_all(
-                'li', {'class': re.compile('ebayui-pagination')})
+                'a', {'class': re.compile('pagination__item')})
         except BaseException:
             options = []
+            print('Warning: No pagination found')
+
+        if self.num_results < 48 and len(options) <= 1:
+            print('Warning: Not enough pages '
+                  f'found for {self.num_results} items')
         for option in options:
             href = ''
             page_num = int(option.text)
-            label = option.find('a')['aria-label']
+            if 'aria-current' in option.attrs:
+                label = 'current'  # Text label
+            else:
+                label = option['type']
             try:
-                href = option.find('a')['href']
+                href = option['href']
             except BaseException:
                 pass
             self.pages.append(Pagination(page_num, label, href))
@@ -236,7 +246,7 @@ class BrandWebPage(WebPage):
     def get_next_page(self):
         self.get_pages()
         for page in self.pages:
-            if 'current' in page.label:
+            if page.label == 'current':
                 self.current_page = page
                 break
 
