@@ -5,8 +5,10 @@ Module for webpage related classes.
 # Python library imports
 import re
 import time
+
 from bs4 import BeautifulSoup
 
+from graphics_card import GraphicsCard
 # Repo code imports
 from product import EBayItem
 
@@ -18,7 +20,7 @@ class WebPage():
     This class serves as a general containiner for an EBay webpage.
     """
 
-    def __init__(self, driver, start_url):
+    def __init__(self, driver, start_url: str):
         """
         Parameters
         ----------
@@ -50,7 +52,19 @@ class WebPage():
 
 
 class MainWebPage(WebPage):
-    def __init__(self, driver, conf):
+    def __init__(self, driver, conf: dict):
+        """
+        Inhertied from base WebPage class. Represents the first page opened,
+        with functions for accepting cookies, opening menus and selecting a
+        particular product.
+
+        Parameters
+        ----------
+        driver : selenium.webdriver....WebDriver
+            The selenium webdriver.
+        conf : dict
+            TOML configuration file.
+        """
         self.conf = conf
         start_url = self.conf['scraper']['start_url']
         WebPage.__init__(self, driver, start_url)
@@ -110,7 +124,7 @@ class MainWebPage(WebPage):
         else:
             raise Exception("Error: No see all menu button found in page")
 
-    def select_option(self, product):
+    def select_option(self, product: GraphicsCard):
         """
         Select an option from the menu given a GraphicsCard object.
         Keeps trying to select option until successful for 10 seconds.
@@ -153,7 +167,7 @@ class Pagination():
     Class for representing an a page option in the pagination bar.
     """
 
-    def __init__(self, page_num, label, href):
+    def __init__(self, page_num: int, label: str, href: str):
         self.page_num = page_num
         self.label = label
         self.href = href
@@ -166,14 +180,14 @@ class Pagination():
 
 
 class BrandWebPage(WebPage):
-    def __init__(self, driver, conf):
+    def __init__(self, driver, conf: dict):
         self.conf = conf
         start_url = self.conf['scraper']['start_url']
         WebPage.__init__(self, driver, start_url)
         self.pages = []
         self.current_page = None
         self.next_page = None
-        self.num_results = None
+        self.num_results = 0
 
     def get_number_of_results(self):
         """
@@ -225,11 +239,11 @@ class BrandWebPage(WebPage):
                 'a', {'class': re.compile('pagination__item')})
         except BaseException:
             options = []
-            print('Warning: No pagination found')
+            # print('Warning: No pagination found')
 
-        if self.num_results < 48 and len(options) <= 1:
-            print('Warning: Not enough pages '
-                  f'found for {self.num_results} items')
+        # if self.num_results < 48 and len(options) <= 1:
+        #     print('Warning: Not enough pages '
+        #           f'found for {self.num_results} items')
         for option in options:
             href = ''
             page_num = int(option.text)

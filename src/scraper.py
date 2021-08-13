@@ -15,7 +15,7 @@ from webpage import BrandWebPage, MainWebPage
 # --------------------------- Function definitions ----------------------------
 
 
-def collect_page_data(b_webpage, verbose=False):
+def collect_page_data(b_webpage: BrandWebPage, verbose=False):
     """
     Collect the data for every item on the webpage.
 

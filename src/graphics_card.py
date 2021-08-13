@@ -12,7 +12,18 @@ class GraphicsCard():
     found from the available options in the full filter menu.
     """
 
-    def __init__(self, name, button_id):
+    def __init__(self, name: str, button_id: str):
+        """
+        Create an empty GraphicsCard instance and populate the name and
+        button_id fields.
+
+        Parameters
+        ----------
+        name : str
+            Name of the GPU as it appears in the menu.
+        button_id : str
+            CSS tag for the butto to select this GPU from the menu.
+        """
         self.name = name
         self.id = button_id
         self.data_collected = False
@@ -26,7 +37,7 @@ class GraphicsCard():
     def short_id(self):
         return self.id.replace('c4-subPanel-Chipset%', '')
 
-    def add_data(self, data):
+    def add_data(self, data: list):
         """
         Add scraper EBayItem data.
 

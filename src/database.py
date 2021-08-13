@@ -2,15 +2,17 @@
 Module for database related classes and functions.
 """
 
+import json
 # Python library imports
 from os import path
-import json
+
+import bs4
 
 # Repo code imports
 from graphics_card import GraphicsCard
 
 
-def make_database(name):
+def make_database(name: str):
     """
     Create database if no current database exists.
 
@@ -52,7 +54,7 @@ class Database():
                                    for prod in self.products if prod.data_collected == False]
         return dict_out
 
-    def write_to_db(self, conf):
+    def write_to_db(self, conf: dict):
         """
         Write data to database.
 
@@ -94,7 +96,7 @@ class Database():
         with open(conf['paths']['database'], 'w') as fout:
             json.dump(new_db, fout, indent=4, sort_keys=False)
 
-    def check_exists(self, name, conf):
+    def check_exists(self, name: str, conf: dict):
         """
         Test whether an entry in the json database with a given name already exists.
 
@@ -119,7 +121,16 @@ class Database():
             return True
         return False
 
-    def get_products(self, soup):
+    def get_products(self, soup: bs4.BeautifulSoup):
+        """
+        Given the Chipset/GPU Model menu, populate the self.products list with
+        the set of products in the menu.
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            Soup of the page with the menu open.
+        """
         menu = soup.find('div', {'class': 'x-overlay__wrapper--right'})
         options = menu.find_all('label',
                                 {'class': 'x-refine__multi-select-label'})
@@ -129,7 +140,7 @@ class Database():
             self.products.append(GraphicsCard(name, button_id))
         print(f'{len(self.products)} GPUs found')
 
-    def filter_products(self, accepted_substrings):
+    def filter_products(self, accepted_substrings: list):
         """
         Filter out unwanted GPUs by selecting only products whose name contains
         one of the substrings listed in the 'accepted_substrings' attribute of

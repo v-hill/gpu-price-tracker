@@ -6,7 +6,7 @@ Module for miscellaneous utilities.
 from datetime import datetime
 
 
-def too_old(conf, data_items):
+def too_old(conf: dict, data_items: list):
     """
     Given the date_limit in the configuration.toml file, test whether the
     items in the data_items list are older than this limit.
@@ -36,7 +36,7 @@ def too_old(conf, data_items):
     return False
 
 
-def check_always_accepted(name, conf):
+def check_always_accepted(name: str, conf: dict):
     """
     Check if the GPU name contains one the always_accept filters set in the
     configuration.toml file.
@@ -57,3 +57,22 @@ def check_always_accepted(name, conf):
     if any(x in name.lower() for x in filters):
         return True
     return False
+
+
+def remove_unicode(input_string: str):
+    """
+    Function that takes in a string and removes any unicode characters.
+
+    Parameters
+    ----------
+    input_string : str
+        The string to remove unicode from.
+
+    Returns
+    -------
+    str
+        String with unicode removed.
+    """
+    strencode = input_string.encode("ascii", "ignore")
+    strdecode = strencode.decode()
+    return strdecode
