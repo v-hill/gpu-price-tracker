@@ -6,9 +6,15 @@ Script to combine multiple database files.
 import json
 import os
 from datetime import datetime
+import toml
+from numpy import ceil
 
 strftime = datetime.strftime
 strptime = datetime.strptime
+
+# Load configuration toml
+with open('src/configuration.toml', 'r') as f:
+    conf = toml.load(f, _dict=dict)
 
 
 def load_db(path):
@@ -77,7 +83,7 @@ def get_db_index(db_new, name):
     return False
 
 
-data_directory = "C:/{your path here}"
+data_directory = conf['paths']['filepath']
 db_new_name = 'combined_gpu_db.json'
 
 filepaths = os.listdir(data_directory)

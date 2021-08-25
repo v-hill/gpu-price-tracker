@@ -8,7 +8,7 @@ import toml
 from selenium import webdriver
 
 # Repo code imports
-from database import Database, make_database
+from database import Database
 from utils import check_always_accepted, too_old
 from webpage import BrandWebPage, MainWebPage
 
@@ -57,7 +57,7 @@ with open('src/configuration.toml', 'r') as f:
     conf = toml.load(f, _dict=dict)
 
 # Create database if one doesn't exist
-db_exists = make_database(conf['paths']['database'])
+db = Database(conf)
 
 # Setup driver options
 if conf['browser']['chrome'] == 'True':
@@ -89,10 +89,9 @@ webpage.open_model_menu()
 webpage.open_all_filter_menu()
 
 # Get GPU models
-db = Database()
 db.get_products(webpage.page_source_soup())
 db.filter_products(conf['filters']['accepted_substrings'])
-db.write_to_db(conf)  # Write new data to database
+db.write_to_db()  # Write new data to database
 
 # Main loop over all products
 iterator = iter(db.products)
@@ -103,7 +102,7 @@ while not done_looping:
     except StopIteration:
         done_looping = True
     else:
-        if db.check_exists(gpu_model.name, conf):
+        if db.check_exists(gpu_model.name):
             print(f'Data already in database for: {gpu_model.name}')
             continue
         webpage.return_to_start_url()
@@ -130,4 +129,4 @@ while not done_looping:
                 next_page_exists = brand_webpage.nav_to_next_page()
                 data.extend(collect_page_data(brand_webpage))
         gpu_model.add_data(data)
-    db.write_to_db(conf)  # Write new data to database
+    db.write_to_db()  # Write new data to database

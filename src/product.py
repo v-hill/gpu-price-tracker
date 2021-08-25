@@ -109,13 +109,13 @@ class EBayItem:
         Converts price and postage info into floating point values.
         """
         attr_dict = copy.deepcopy(self.item_attributes)
-        for key in attr_dict:
+        for key in ['price', 'postage']:
             test_val = str(attr_dict[key]).replace(',', '')
             if any(map(test_val.lower().__contains__, ["free", "collect"])):
                 price_num = float(0)
                 self.item_attributes[key] = price_num
 
-            elif "£" in test_val:
+            else:
                 test_val = remove_unicode(test_val)
                 price_list = re.findall(r'\d*\.?\d+', test_val)
                 if len(price_list) != 1:
@@ -129,6 +129,8 @@ class EBayItem:
             total = (self.item_attributes['price'] +
                      self.item_attributes['postage'])
         except BaseException:
-            print('ah ha')
+            print(
+                self.item_attributes['price'],
+                self.item_attributes['postage'])
         total = round(total, 2)
         self.item_attributes['total price'] = total

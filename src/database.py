@@ -1,42 +1,53 @@
 """
 Module for database related classes and functions.
 """
-
-import json
 # Python library imports
+import datetime
+import json
 from os import path
-
 import bs4
 
 # Repo code imports
 from graphics_card import GraphicsCard
 
 
-def make_database(name: str):
-    """
-    Create database if no current database exists.
-
-    Parameters
-    ----------
-    name : str
-        Name of database (must have .json extension)
-        e.g. my_database.json
-
-    """
-    if path.exists(name):
-        return True
-    else:
-        with open(name, 'w') as fout:
-            json.dump([], fout, indent=4, sort_keys=False)
-    return False
-
 class Database():
     """
     Class for containing and processing all of the scraped data.
     """
 
-    def __init__(self):
+    def __init__(self, conf: dict):
         self.products = []
+        self.save_filepath = self.get_save_filepath(conf)
+        self.make_database()
+
+    def get_save_filepath(self, conf: dict):
+        database_filename = conf['paths']['database']
+        current_time = datetime.datetime.now()
+        date_str = current_time.strftime("%Y_%m_%d_")
+        database_filename = date_str + database_filename
+
+        datbaase_path = conf['paths']['filepath']
+        save_filepath = path.join(datbaase_path, database_filename)
+        return save_filepath
+
+    def make_database(self):
+        """
+        Create database if no current database exists.
+
+        Parameters
+        ----------
+        name : str
+            Name of database (must have .json extension)
+            e.g. my_database.json
+
+        """
+        if path.exists(self.save_filepath):
+            return True
+        else:
+            with open(self.save_filepath, 'w') as fout:
+                json.dump([], fout, indent=4, sort_keys=False)
+        return False
 
     def to_dict(self):
         """
@@ -54,7 +65,7 @@ class Database():
                                    for prod in self.products if prod.data_collected == False]
         return dict_out
 
-    def write_to_db(self, conf: dict):
+    def write_to_db(self):
         """
         Write data to database.
 
@@ -66,11 +77,11 @@ class Database():
         new_data = self.to_dict()
 
         # Load existing database
-        with open(conf['paths']['database']) as f:
+        with open(self.save_filepath) as f:
             existing_db = json.load(f)
 
         if existing_db == []:
-            with open(conf['paths']['database'], 'w') as fout:
+            with open(self.save_filepath, 'w') as fout:
                 json.dump(new_data, fout, indent=4, sort_keys=False)
                 return 1
 
@@ -93,10 +104,10 @@ class Database():
 
         # print(f'new database: {len(new_db["collected"])} collected, '
         #       f'{len(new_db["uncollected"])} uncollected')
-        with open(conf['paths']['database'], 'w') as fout:
+        with open(self.save_filepath, 'w') as fout:
             json.dump(new_db, fout, indent=4, sort_keys=False)
 
-    def check_exists(self, name: str, conf: dict):
+    def check_exists(self, name: str):
         """
         Test whether an entry in the json database with a given name already exists.
 
@@ -113,7 +124,7 @@ class Database():
             True if name already in database, else False.
         """
         # Load existing database
-        with open(conf['paths']['database']) as f:
+        with open(self.save_filepath) as f:
             existing_db = json.load(f)
 
         collected_names = [e['name'] for e in existing_db['collected']]

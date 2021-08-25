@@ -277,7 +277,7 @@ class BrandWebPage(WebPage):
         if self.next_page is not None:
             try:
                 self.driver.get(self.next_page.href)
-                time.sleep(0.3)
+                time.sleep(0.5)
                 return True
             except BaseException:
                 raise Exception("Could not navigate to next page")
