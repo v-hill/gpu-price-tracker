@@ -351,5 +351,5 @@ card_dicts = [{'search_term': '1050',
                'founders': False}]
 
 
-with open("./plotting/gpu_plots.json", "w") as outfile:
+with open("./analysis/gpu_plots.json", "w") as outfile:
     json.dump(card_dicts, outfile, indent=4, sort_keys=False)

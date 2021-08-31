@@ -10,9 +10,8 @@ import toml
 from numpy import ceil
 
 
-
 # Load plotting spec file
-spec_filepath = "plotting/gpu_plots.json"
+spec_filepath = "analysis/gpu_plots.json"
 with open(spec_filepath) as input_file:
     plots_dict = json.load(input_file)
 
@@ -126,10 +125,9 @@ def apply_dict_filters(df, card_dict, filter_title=True, clean_outliers=True):
     return df
 
 
-for index, filters in enumerate(plots_dict):
-    # index = 27
-    # filters = plots_dict[index]
+list_of_dataframes = []
 
+for index, filters in enumerate(plots_dict):
     df_subset = apply_dict_filters(
         df,
         filters,
@@ -137,8 +135,8 @@ for index, filters in enumerate(plots_dict):
         clean_outliers=True)
 
     # average across a number of days
-    average_period = 14  # set the number of days to average by
-    df_subset['day_count'] = (
+    average_period = 30.41666  # set the number of days to average by
+    df_subset['month_count'] = (
         df_subset['date'] -
         pd.to_datetime(
             datetime.date(
@@ -146,8 +144,8 @@ for index, filters in enumerate(plots_dict):
                 1,
                 1))).astype('timedelta64[D]').astype(int)
 
-    df_subset['day_group'] = ceil(
-        (df_subset['day_count'].values / average_period))
+    df_subset['month_group'] = ceil(
+        (df_subset['month_count'].values / average_period))
 
     df_subset['num_sold'] = 1
 
@@ -161,59 +159,16 @@ for index, filters in enumerate(plots_dict):
         'num_sold': 'mean',
         'date_int': 'max',
         'num_sold': 'sum',
-        'day_group': 'mean'}
+        'month_group': 'mean'}
 
     df_average = df_subset.groupby(
-        ['day_group']).agg(agg_dict).reset_index(
+        ['month_group']).agg(agg_dict).reset_index(
             drop=True)
 
     df_average.rename(columns={'date_int': 'date'}, inplace=True)
     df_average["date"] = pd.to_datetime(df_average['date'])
+    df_average["title"] = filters["title"]
+    list_of_dataframes.append(df_average)
 
-    cmap = mplc.LinearSegmentedColormap.from_list(
-        "", [[0.25, 1, 0.25], [1, 0.25, 0.25]])
-
-    fig = plt.figure(figsize=(8, 6), dpi=200)
-    ax = fig.add_subplot(111)
-
-    ax.grid(color='gray', linestyle='dashed', which='both', alpha=0.5)
-
-    x_axis = 'date'
-    y_axis = 'total price'
-    plt.xlabel(x_axis.title())
-    plt.ylabel(y_axis.title())
-    plt.title(f'{filters["title"]}', fontsize=14)
-
-    plt.text(
-        0.025,
-        0.9,
-        f'Latest {y_axis} average: £{df_average[y_axis].values[-1]:0.2f}',
-        fontsize=12,
-        transform=ax.transAxes)
-
-    plt.scatter(
-        df_average[x_axis],
-        df_average[y_axis],
-        c=df_average[y_axis],
-        cmap=cmap,
-        alpha=0.7,
-        s=10)
-
-    x2, y2 = 0, -10
-    for i, txt in enumerate(df_average['num_sold']):
-        if i%2==0:
-            continue
-
-        ax.annotate(
-            f"{txt:0.0f}",
-            (df_average[x_axis].values[i],
-             df_average[y_axis].values[i]),
-            xycoords='data',
-            xytext=(x2, y2), textcoords='offset points',
-            fontsize=8,
-            alpha=0.5)
-
-    plt.plot(df_average[x_axis], df_average[y_axis], '--', c=[0.25, 0.25, 1])
-    plt.savefig(f"{conf['paths']['filepath']}/{filters['title'].replace(' ','_')}.png")
-    print(index, filters["title"], df_average['num_sold'].sum())
-    print(' ')
+df_final = pd.concat(list_of_dataframes)
+print(df_final.shape)
