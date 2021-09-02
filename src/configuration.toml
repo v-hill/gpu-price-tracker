@@ -5,9 +5,11 @@ chrome = "False"
 firefox = "True"
 
 [paths]
-chromedriver = "C:/.....chromedriver.exe"
-geckodriver = "C:/.....geckodriver.exe"
+chromedriver = "C://.....chromedriver.exe"
 database = "gpu_db.json"
+filepath = "C://...../Data/"
+geckodriver = "C:/.....geckodriver.exe"
+
 
 [driver_options]
 disable_gpu = "True"
@@ -20,7 +22,7 @@ max = 5000
 min = 20
 
 [date_limit]
-oldest = "2021-06-01"
+oldest = "2021-01-01"
 
 [filters]
 accepted_substrings = [ "GTX", "RTX",]
