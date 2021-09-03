@@ -70,17 +70,3 @@ disable_gpu = "True"
 '''
 
 
-## Dependencies
-
-This code replies on the following python packages, with minimum version listed where necessary:
-
-```
-python: >= 3.6, 
-beautifulsoup4 >= 4.9.1
-pandas >= 1.0.5
-selenium >= 3.141.0
-toml >= 0.10.1
-```
-
-
-
