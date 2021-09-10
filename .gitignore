@@ -133,3 +133,6 @@ dmypy.json
 
 # Plots
 .png
+
+# VS Code
+.vscode

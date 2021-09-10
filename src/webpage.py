@@ -5,6 +5,7 @@ Module for webpage related classes.
 # Python library imports
 import re
 import time
+import logging
 
 from bs4 import BeautifulSoup
 
@@ -292,3 +293,30 @@ class BrandWebPage(WebPage):
         if len(item_tags) == 0:
             raise Exception("No items found on page")
         return [EBayItem(tag) for tag in item_tags]
+
+
+    def collect_page_data(self):
+        """
+        Collect the data for every item on the webpage.
+
+        Returns
+        -------
+        items : list
+            List of EBayItem objects.
+        """
+        item_tags = self.make_items()
+        if len(item_tags) == 0:
+            raise Exception("No items found on page")
+        items = []
+        for item in item_tags:
+            item.get_details()
+            item.get_attribute_dict()
+            item.get_title()
+            item.parse_date()
+            item.sort_price_details()
+            item.get_total_cost()
+            items.append(item)
+            for key, val in item.item_attributes.items():
+                logging.debug(f'{key:<12}: {val}')
+            logging.debug('-' * 60)
+        return items

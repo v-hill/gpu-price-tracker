@@ -1,6 +1,9 @@
 """
 Main scraper executable.
 """
+# Standard library imports
+import logging
+
 # Python library imports
 import selenium.webdriver.chrome.options as chrome
 import selenium.webdriver.firefox.options as firefox
@@ -12,49 +15,19 @@ from database import Database
 from utils import check_always_accepted, too_old
 from webpage import BrandWebPage, MainWebPage
 
-# --------------------------- Function definitions ----------------------------
-
-
-def collect_page_data(b_webpage: BrandWebPage, verbose=False):
-    """
-    Collect the data for every item on the webpage.
-
-    Parameters
-    ----------
-    b_webpage : BrandWebPage
-        Webpage class.
-    verbose : bool, optional
-        Prints data on every item. The default is False.
-
-    Returns
-    -------
-    items : list
-        List of EBayItem objects.
-    """
-    item_tags = b_webpage.make_items()
-    if len(item_tags) == 0:
-        raise Exception("No items found on page")
-    items = []
-    for item in item_tags:
-        item.get_details()
-        item.get_attribute_dict()
-        item.get_title()
-        item.parse_date()
-        item.sort_price_details()
-        item.get_total_cost()
-        items.append(item)
-        if verbose:
-            for key, val in item.item_attributes.items():
-                print(f'{key:<12}: {val}')
-            print('-' * 60)
-    return items
-
 # ----------------------------------- Main ------------------------------------
 
 
 # Load configuration toml
 with open('src/configuration.toml', 'r') as f:
     conf = toml.load(f, _dict=dict)
+
+# Setup logging
+logging.basicConfig(filename='scraper.log',
+                    encoding='utf-8',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    datefmt='%Y/%m/%d %I:%M:%S %p',
+                    level=logging.DEBUG)
 
 # Create database if one doesn't exist
 db = Database(conf)
@@ -123,10 +96,10 @@ while not done_looping:
         if sucess or check_always_accepted(gpu_model.name, conf):
             brand_webpage.get_pages()
             next_page_exists = True
-            data.extend(collect_page_data(brand_webpage))
+            data.extend(brand_webpage.collect_page_data(brand_webpage))
             while next_page_exists and not too_old(conf, data):
                 # Naviagte to the next page and collect item data
                 next_page_exists = brand_webpage.nav_to_next_page()
-                data.extend(collect_page_data(brand_webpage))
+                data.extend(brand_webpage.collect_page_data(brand_webpage))
         gpu_model.add_data(data)
     db.write_to_db()  # Write new data to database
