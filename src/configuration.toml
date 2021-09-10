@@ -18,7 +18,7 @@ disable_gpu = "True"
 start_url = "https://www.ebay.co.uk/b/Computer-Graphics-Video-Cards/27386/bn_661667?LH_ItemCondition=3000&LH_PrefLoc=1&LH_Sold=1&rt=nc&_sop=13&_udlo=10"
 
 [num_results]
-max = 5000
+max = 7500
 min = 20
 
 [date_limit]
