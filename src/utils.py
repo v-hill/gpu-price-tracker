@@ -24,12 +24,12 @@ def too_old(conf: dict, data_items: list):
         True if there are items in data_items which are older than the date
         limit from the .toml config.
     """
-    date_limit_str = conf['date_limit']['oldest']
-    date_limit = datetime.strptime(date_limit_str, '%Y-%m-%d')
+    date_limit_str = conf["date_limit"]["oldest"]
+    date_limit = datetime.strptime(date_limit_str, "%Y-%m-%d")
     oldest_sale = datetime.now()
     for item in data_items:
-        if item.item_attributes['date'] < oldest_sale:
-            oldest_sale = item.item_attributes['date']
+        if item.item_attributes["date"] < oldest_sale:
+            oldest_sale = item.item_attributes["date"]
     if oldest_sale < date_limit:
         # print(f'    oldest: {oldest_sale}, limit: {date_limit}') # For debug
         return True
@@ -53,7 +53,7 @@ def check_always_accepted(name: str, conf: dict):
     bool
         True if GPU contains an always accepted string, else False.
     """
-    filters = [f.lower() for f in conf['filters']['always_accept']]
+    filters = [f.lower() for f in conf["filters"]["always_accept"]]
     if any(x in name.lower() for x in filters):
         return True
     return False

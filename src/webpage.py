@@ -13,6 +13,7 @@ import toml
 from bs4 import BeautifulSoup
 
 from graphics_card import GraphicsCard
+
 # Repo code imports
 from product import EBayItem
 
@@ -21,22 +22,24 @@ from product import EBayItem
 
 def get_driver_options():
     # Load configuration toml
-    with open('src/configuration.toml', 'r') as f:
+    with open("src/configuration.toml", "r") as f:
         conf = toml.load(f, _dict=dict)
-    if conf['browser']['chrome'] == 'True':
+    if conf["browser"]["chrome"] == "True":
         browser_options = chrome.Options()
-    if conf['browser']['firefox'] == 'True':
+    if conf["browser"]["firefox"] == "True":
         browser_options = firefox.Options()
     browser_options.add_argument(
-        '--disable-blink-features=AutomationControlled')
-    if bool(conf['driver_options']['disable_gpu']):
-        browser_options.add_argument('--disable-gpu')  # Disable GPU
+        "--disable-blink-features=AutomationControlled"
+    )
+    if bool(conf["driver_options"]["disable_gpu"]):
+        browser_options.add_argument("--disable-gpu")  # Disable GPU
     return browser_options
+
 
 # -----------------------------------------------------------------------------
 
 
-class WebPage():
+class WebPage:
     """
     This class serves as a general containiner for an EBay webpage.
     """
@@ -67,7 +70,8 @@ class WebPage():
         """
         Return a BeautifulSoup soup representation of the current webpage.
         """
-        return BeautifulSoup(self.driver.page_source, 'html.parser')
+        return BeautifulSoup(self.driver.page_source, "html.parser")
+
 
 # -----------------------------------------------------------------------------
 
@@ -87,7 +91,7 @@ class MainWebPage(WebPage):
             TOML configuration file.
         """
         self.conf = conf
-        start_url = self.conf['scraper']['start_url']
+        start_url = self.conf["scraper"]["start_url"]
         WebPage.__init__(self, driver, start_url)
         self.return_to_start_url()
         time.sleep(2)
@@ -95,32 +99,34 @@ class MainWebPage(WebPage):
     def auto_accept_cookies(self):
         soup = self.page_source_soup()
         try:
-            accept_button_id = ''
-            for button in soup.find_all('button'):
-                if 'Accept' in button.text:
-                    accept_button_id = button['id']
+            accept_button_id = ""
+            for button in soup.find_all("button"):
+                if "Accept" in button.text:
+                    accept_button_id = button["id"]
                     break
         except BaseException:
-            print('Error: No cookies accept button found in page \n '
-                  'Please accept cookies manually')
-        if accept_button_id != '':
-            gdpr_button = self.driver.find_element_by_id('gdpr-banner-accept')
+            print(
+                "Error: No cookies accept button found in page \n "
+                "Please accept cookies manually"
+            )
+        if accept_button_id != "":
+            gdpr_button = self.driver.find_element_by_id("gdpr-banner-accept")
             gdpr_button.click()
             time.sleep(2)
 
     def open_model_menu(self):
         soup = self.page_source_soup()
         try:
-            button_css = ''
-            for button in soup.find_all('button'):
-                if 'GPU Model' in button.text:
+            button_css = ""
+            for button in soup.find_all("button"):
+                if "GPU Model" in button.text:
                     # print(button.prettify()) # For debug
-                    aria_controls_text = button['aria-controls']
+                    aria_controls_text = button["aria-controls"]
                     button_css = f'[aria-controls="{aria_controls_text}"]'
                     break
         except BaseException:
             raise Exception("No GPU model menu button found in page")
-        if button_css != '':
+        if button_css != "":
             menu_button = self.driver.find_element_by_css_selector(button_css)
             menu_button.click()
             time.sleep(1)
@@ -128,18 +134,19 @@ class MainWebPage(WebPage):
     def open_all_filter_menu(self):
         soup = self.page_source_soup()
         try:
-            button_css = ''
-            for button in soup.find_all('button'):
-                if 'see all' in button.text:
-                    aria_label_text = button['aria-label']
-                    if 'gpu model' in aria_label_text.lower():
+            button_css = ""
+            for button in soup.find_all("button"):
+                if "see all" in button.text:
+                    aria_label_text = button["aria-label"]
+                    if "gpu model" in aria_label_text.lower():
                         # print(button.prettify()) # For debug
                         button_css = f'[aria-label="{aria_label_text}"]'
         except BaseException:
             raise Exception("Error: See all menu button not found")
-        if button_css != '':
+        if button_css != "":
             see_all_button = self.driver.find_element_by_css_selector(
-                button_css)
+                button_css
+            )
             see_all_button.click()
             time.sleep(2)
         else:
@@ -160,15 +167,17 @@ class MainWebPage(WebPage):
             try:
                 button_id = product.short_id()
                 option_button = self.driver.find_element_by_css_selector(
-                    f'[id*="{button_id}"]')
+                    f'[id*="{button_id}"]'
+                )
                 option_button.click()
                 time.sleep(1)
                 return 1
             except BaseException:
                 time.sleep(1)
         if True:
-            raise Exception('Could not select option from the menu: '
-                            f'{product.name}')
+            raise Exception(
+                f"Could not select option from the menu: {product.name}"
+            )
 
     def apply_selection(self):
         """
@@ -180,10 +189,11 @@ class MainWebPage(WebPage):
         apply_button.click()
         time.sleep(3)
 
+
 # -----------------------------------------------------------------------------
 
 
-class Pagination():
+class Pagination:
     """
     Class for representing an a page option in the pagination bar.
     """
@@ -195,7 +205,8 @@ class Pagination():
         self.data_collected = False
 
     def __repr__(self):
-        return f'page num: {self.page_num}, label: {self.label}'
+        return f"page num: {self.page_num}, label: {self.label}"
+
 
 # -----------------------------------------------------------------------------
 
@@ -203,7 +214,7 @@ class Pagination():
 class BrandWebPage(WebPage):
     def __init__(self, driver, conf: dict):
         self.conf = conf
-        start_url = self.conf['scraper']['start_url']
+        start_url = self.conf["scraper"]["start_url"]
         WebPage.__init__(self, driver, start_url)
         self.pages = []
         self.current_page = None
@@ -231,20 +242,22 @@ class BrandWebPage(WebPage):
         """
         soup = self.page_source_soup()
         num_results = soup.find_all(
-            'h2', {'class': 'srp-controls__count-heading'})
+            "h2", {"class": "srp-controls__count-heading"}
+        )
 
         if num_results == 0:
             raise Exception("Could not find number of results")
 
-        num_results_str = str(num_results[0].text).replace(',', '')
-        num_results = int(re.findall(r'\d+', num_results_str)[0])
-        print(f'    {num_results} results found')
+        num_results_str = str(num_results[0].text).replace(",", "")
+        num_results = int(re.findall(r"\d+", num_results_str)[0])
+        print(f"    {num_results} results found")
 
-        if num_results <= self.conf['num_results']['min']:
+        if num_results <= self.conf["num_results"]["min"]:
             return num_results, False
-        if num_results >= self.conf['num_results']['max']:
-            raise Exception('Too many results found, navigation to GPU page '
-                            'unsuccessful')
+        if num_results >= self.conf["num_results"]["max"]:
+            raise Exception(
+                "Too many results found, navigation to GPU page unsuccessful"
+            )
         self.num_results = num_results
         return num_results, True
 
@@ -254,10 +267,11 @@ class BrandWebPage(WebPage):
         """
         soup = self.page_source_soup()
         self.pages = []
-        pagination = soup.find('div', {'class': 'b-pagination'})
+        pagination = soup.find("div", {"class": "b-pagination"})
         try:
             options = pagination.find_all(
-                'a', {'class': re.compile('pagination__item')})
+                "a", {"class": re.compile("pagination__item")}
+            )
         except BaseException:
             options = []
             # print('Warning: No pagination found')
@@ -266,14 +280,14 @@ class BrandWebPage(WebPage):
         #     print('Warning: Not enough pages '
         #           f'found for {self.num_results} items')
         for option in options:
-            href = ''
+            href = ""
             page_num = int(option.text)
-            if 'aria-current' in option.attrs:
-                label = 'current'  # Text label
+            if "aria-current" in option.attrs:
+                label = "current"  # Text label
             else:
-                label = option['type']
+                label = option["type"]
             try:
-                href = option['href']
+                href = option["href"]
             except BaseException:
                 pass
             self.pages.append(Pagination(page_num, label, href))
@@ -281,7 +295,7 @@ class BrandWebPage(WebPage):
     def get_next_page(self):
         self.get_pages()
         for page in self.pages:
-            if page.label == 'current':
+            if page.label == "current":
                 self.current_page = page
                 break
 
@@ -307,9 +321,11 @@ class BrandWebPage(WebPage):
     def make_items(self):
         soup = self.page_source_soup()
         items_container = soup.find(
-            "ul", {"class": re.compile('srp-results srp-grid')})
+            "ul", {"class": re.compile("srp-results srp-grid")}
+        )
         item_tags = items_container.find_all(
-            "div", {"class": "s-item__wrapper clearfix"})
+            "div", {"class": "s-item__wrapper clearfix"}
+        )
         if len(item_tags) == 0:
             raise Exception("No items found on page")
         return [EBayItem(tag) for tag in item_tags]
@@ -336,6 +352,6 @@ class BrandWebPage(WebPage):
             item.get_total_cost()
             items.append(item)
             for key, val in item.item_attributes.items():
-                logging.debug(f'{key:<12}: {val}')
-            logging.debug('-' * 60)
+                logging.debug(f"{key:<12}: {val}")
+            logging.debug("-" * 60)
         return items
