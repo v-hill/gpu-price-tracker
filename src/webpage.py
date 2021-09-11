@@ -2,16 +2,36 @@
 Module for webpage related classes.
 """
 
-# Python library imports
+import logging
 import re
 import time
-import logging
 
+import selenium.webdriver.chrome.options as chrome
+import selenium.webdriver.firefox.options as firefox
+from selenium import webdriver
+import toml
 from bs4 import BeautifulSoup
 
 from graphics_card import GraphicsCard
 # Repo code imports
 from product import EBayItem
+
+# -----------------------------------------------------------------------------
+
+
+def get_driver_options():
+    # Load configuration toml
+    with open('src/configuration.toml', 'r') as f:
+        conf = toml.load(f, _dict=dict)
+    if conf['browser']['chrome'] == 'True':
+        browser_options = chrome.Options()
+    if conf['browser']['firefox'] == 'True':
+        browser_options = firefox.Options()
+    browser_options.add_argument(
+        '--disable-blink-features=AutomationControlled')
+    if bool(conf['driver_options']['disable_gpu']):
+        browser_options.add_argument('--disable-gpu')  # Disable GPU
+    return browser_options
 
 # -----------------------------------------------------------------------------
 
@@ -293,7 +313,6 @@ class BrandWebPage(WebPage):
         if len(item_tags) == 0:
             raise Exception("No items found on page")
         return [EBayItem(tag) for tag in item_tags]
-
 
     def collect_page_data(self):
         """

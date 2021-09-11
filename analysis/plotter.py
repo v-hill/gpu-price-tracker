@@ -151,7 +151,7 @@ for index, filters in enumerate(plots_dict):
 
     df_subset['num_sold'] = 1
 
-    df_subset["date_int"] = pd.to_datetime(df_subset['date']).astype(np.int64)
+    df_subset["date_int"] = pd.to_datetime(df_subset['date']).view(np.int64)
 
     agg_dict = {
         'bids': 'mean',
@@ -173,7 +173,7 @@ for index, filters in enumerate(plots_dict):
     cmap = mplc.LinearSegmentedColormap.from_list(
         "", [[0.25, 1, 0.25], [1, 0.25, 0.25]])
 
-    fig = plt.figure(figsize=(8, 6), dpi=200)
+    fig = plt.figure(figsize=(10, 6), dpi=200)
     ax = fig.add_subplot(111)
 
     ax.grid(color='gray', linestyle='dashed', which='both', alpha=0.5)
@@ -201,8 +201,8 @@ for index, filters in enumerate(plots_dict):
 
     x2, y2 = 0, -10
     for i, txt in enumerate(df_average['num_sold']):
-        if i%2==0:
-            continue
+        # if i%2==0:
+        #     continue
 
         ax.annotate(
             f"{txt:0.0f}",

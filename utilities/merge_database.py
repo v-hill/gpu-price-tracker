@@ -126,8 +126,8 @@ for file1 in filepaths:
                 new_entry['data'].append(item_new)
             new_entry['num_sold'] = len(new_entry['data'])
             db_new['collected'][idx] = new_entry
-            print(f'    {items_removed/(len(gpu["data"])):0.1%} '
-                  'of cards not added')
+            print(f'    {1-(items_removed/len(gpu["data"])):0.1%} '
+                  'of cards added')
     print(f'Number of GPUs in database {len(db_new["collected"])}')
     print('-' * 79)
 
