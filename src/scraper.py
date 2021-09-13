@@ -3,6 +3,7 @@ Main scraper executable.
 """
 # Standard library imports
 import logging
+import logging.config
 
 # Python library imports
 import selenium.webdriver.chrome.options as chrome
@@ -21,9 +22,9 @@ from webpage import BrandWebPage, MainWebPage, get_driver_options
 with open("src/configuration.toml", "r") as f:
     conf = toml.load(f, _dict=dict)
 
-# Setup logging
-
-logger = logging.getLogger(__name__)
+# # Setup logging
+# logging.config.fileConfig('logging.conf')
+# logger = logging.getLogger('simpleExample')
 
 logging.basicConfig(
     filename="scraper.log",

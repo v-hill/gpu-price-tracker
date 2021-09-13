@@ -1,0 +1,24 @@
+[tool.poetry]
+authors = ["V. Hill"]
+description = "Selenium based web scraper for collecting data on sold GPUs from EBay."
+license = "MIT"
+name = "gpu-price-tracker"
+readme = 'README.md'
+repository = "https://github.com/v-hill/gpu-price-tracker"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+beautifulsoup4 = "^4.9.3"
+matplotlib = "^3.3.4"
+numpy = "^1.17.3"
+pandas = "^1.2.5"
+python = "^3.7.1"
+selenium = "^3.141.0"
+toml = "^0.10.2"
+
+[tool.poetry.dev-dependencies]
+black = "^21.7b0"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
