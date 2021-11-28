@@ -10,19 +10,24 @@ import selenium.webdriver.chrome.options as chrome
 import selenium.webdriver.firefox.options as firefox
 from bs4 import BeautifulSoup
 
+from configuration import BROWSER, DRIVER_OPTIONS
 from graphics_card import GraphicsCard
 from product import EBayItem
-from configuration import BROWSER, DRIVER_OPTIONS
 
 # -----------------------------------------------------------------------------
 
 
 def get_driver_options():
+    logging.info(f"{BROWSER} browser selected")
     if BROWSER == "chrome":
         browser_options = chrome.Options()
     if BROWSER == "firefox":
         browser_options = firefox.Options()
-    browser_options.add_argument("--disable-blink-features=AutomationControlled")
+    else:
+        raise Exception(f"Browser {BROWSER} is not 'chrome' or 'firefox'")
+    browser_options.add_argument(
+        "--disable-blink-features=AutomationControlled"
+    )
     if bool(DRIVER_OPTIONS["disable_gpu"]):
         browser_options.add_argument("--disable-gpu")  # Disable GPU
     return browser_options
@@ -94,10 +99,7 @@ class MainWebPage(WebPage):
                     accept_button_id = button["id"]
                     break
         except BaseException:
-            print(
-                "Error: No cookies accept button found in page \n "
-                "Please accept cookies manually"
-            )
+            logging.info("Error: No cookies accept button found in page")
         if accept_button_id != "":
             gdpr_button = self.driver.find_element_by_id("gdpr-banner-accept")
             gdpr_button.click()
@@ -133,7 +135,9 @@ class MainWebPage(WebPage):
         except BaseException:
             raise Exception("Error: See all menu button not found")
         if button_css != "":
-            see_all_button = self.driver.find_element_by_css_selector(button_css)
+            see_all_button = self.driver.find_element_by_css_selector(
+                button_css
+            )
             see_all_button.click()
             time.sleep(2)
         else:
@@ -162,7 +166,9 @@ class MainWebPage(WebPage):
             except BaseException:
                 time.sleep(1)
         if True:
-            raise Exception(f"Could not select option from the menu: {product.name}")
+            raise Exception(
+                f"Could not select option from the menu: {product.name}"
+            )
 
     def apply_selection(self):
         """
@@ -225,14 +231,16 @@ class BrandWebPage(WebPage):
             True if the number of results value is within the correct range.
         """
         soup = self.page_source_soup()
-        num_results = soup.find_all("h2", {"class": "srp-controls__count-heading"})
+        num_results = soup.find_all(
+            "h2", {"class": "srp-controls__count-heading"}
+        )
 
         if num_results == 0:
             raise Exception("Could not find number of results")
 
         num_results_str = str(num_results[0].text).replace(",", "")
         num_results = int(re.findall(r"\d+", num_results_str)[0])
-        print(f"    {num_results} results found")
+        logging.info(f"    {num_results} results found")
 
         if num_results <= self.num_results_limits["min"]:
             return num_results, False
@@ -302,7 +310,9 @@ class BrandWebPage(WebPage):
 
     def make_items(self):
         soup = self.page_source_soup()
-        items_container = soup.find("ul", {"class": re.compile("srp-results srp-grid")})
+        items_container = soup.find(
+            "ul", {"class": re.compile("srp-results srp-grid")}
+        )
         item_tags = items_container.find_all(
             "div", {"class": "s-item__wrapper clearfix"}
         )
