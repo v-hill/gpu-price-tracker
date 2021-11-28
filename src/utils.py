@@ -2,7 +2,7 @@
 Module for miscellaneous utilities.
 """
 
-
+import logging
 from datetime import datetime
 
 
@@ -32,7 +32,9 @@ def too_old(date_limit: dict, data_items: list):
         if item.item_attributes["date"] < oldest_sale:
             oldest_sale = item.item_attributes["date"]
     if oldest_sale < date_limit:
-        # print(f'    oldest: {oldest_sale}, limit: {date_limit}') # For debug
+        logging.debug(
+            f"    oldest: {oldest_sale}, limit: {date_limit}"
+        )  # For debug
         return True
     return False
 

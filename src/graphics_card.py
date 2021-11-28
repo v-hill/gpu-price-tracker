@@ -3,6 +3,7 @@ Module for graphics card class.
 """
 
 
+import logging
 from datetime import datetime
 
 
@@ -46,7 +47,7 @@ class GraphicsCard:
         data : list
             List of EBayItem objects
         """
-        print(f"    {len(data)} results added to database")
+        logging.info(f"    {len(data)} results added to database")
         self.data_collected = True
         self.data = data
         now = datetime.now()

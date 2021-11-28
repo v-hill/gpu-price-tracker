@@ -3,10 +3,10 @@ Main scraper executable.
 """
 import logging
 import logging.config
+import sys
 
 from selenium import webdriver
 
-from database import Database
 from configuration import (
     BROWSER,
     DATE_LIMIT,
@@ -15,6 +15,7 @@ from configuration import (
     PATHS,
     START_URL,
 )
+from database import Database
 from utils import check_always_accepted, too_old
 from webpage import BrandWebPage, MainWebPage, get_driver_options
 
@@ -23,18 +24,22 @@ from webpage import BrandWebPage, MainWebPage, get_driver_options
 # Setup logging
 logging.basicConfig(
     filename="scraper.log",
-    encoding="utf-8",
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    filemode="a",
+    format="%(asctime)s | %(levelname)s | %(message)s",
     datefmt="%Y/%m/%d %H:%M:%S",
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
+logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+logging.info("----  Started scraper.py script  ----")
 
 # Create database if one doesn't exist
 db = Database(PATHS)
 
 browser_options = get_driver_options()  # Setup driver options
 if BROWSER == "chrome":
-    main_driver = webdriver.Chrome(PATHS["chromedriver"], options=browser_options)
+    main_driver = webdriver.Chrome(
+        PATHS["chromedriver"], options=browser_options
+    )
 if BROWSER == "firefox":
     main_driver = webdriver.Firefox(
         executable_path=PATHS["geckodriver"], options=browser_options
@@ -65,7 +70,7 @@ while not done_looping:
         done_looping = True
     else:
         if db.check_exists(gpu_model.name):
-            print(f"Data already in database for: {gpu_model.name}")
+            logging.info(f"Data already in database for: {gpu_model.name}")
             continue
         webpage.return_to_start_url()
 
@@ -74,7 +79,7 @@ while not done_looping:
         webpage.open_all_filter_menu()
         webpage.select_option(gpu_model)
         webpage.apply_selection()
-        print(f"Collecting data for: {gpu_model.name}")
+        logging.info(f"Collecting data for: {gpu_model.name}")
 
         # Get number of results
         brand_webpage = BrandWebPage(main_driver, START_URL, NUM_RESULTS)
