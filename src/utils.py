@@ -2,19 +2,20 @@
 Module for miscellaneous utilities.
 """
 
-# Python library imports
+
 from datetime import datetime
 
 
-def too_old(conf: dict, data_items: list):
+def too_old(date_limit: dict, data_items: list):
     """
     Given the date_limit in the configuration.toml file, test whether the
     items in the data_items list are older than this limit.
 
     Parameters
     ----------
-    conf : dict
-        configuration.toml
+    date_limit : dict
+        The dictionary of limits for how old an item can be and still be added
+        to the database.
     data_items : list
         List of EbayItem objects.
 
@@ -24,7 +25,7 @@ def too_old(conf: dict, data_items: list):
         True if there are items in data_items which are older than the date
         limit from the .toml config.
     """
-    date_limit_str = conf["date_limit"]["oldest"]
+    date_limit_str = date_limit["oldest"]
     date_limit = datetime.strptime(date_limit_str, "%Y-%m-%d")
     oldest_sale = datetime.now()
     for item in data_items:
@@ -36,24 +37,24 @@ def too_old(conf: dict, data_items: list):
     return False
 
 
-def check_always_accepted(name: str, conf: dict):
+def check_always_accepted(name: str, filters: dict):
     """
     Check if the GPU name contains one the always_accept filters set in the
-    configuration.toml file.
+    configuration.
 
     Parameters
     ----------
     name : str
         GPU name
-    conf : dict
-        configuration.toml
+    filters : dict
+        Dict containing accepted_substrings strings and always_accept strings
 
     Returns
     -------
     bool
         True if GPU contains an always accepted string, else False.
     """
-    filters = [f.lower() for f in conf["filters"]["always_accept"]]
+    filters = [f.lower() for f in filters["always_accept"]]
     if any(x in name.lower() for x in filters):
         return True
     return False

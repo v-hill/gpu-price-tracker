@@ -1,31 +1,26 @@
 """
 Main scraper executable.
 """
-# Standard library imports
 import logging
 import logging.config
 
-# Python library imports
-import selenium.webdriver.chrome.options as chrome
-import selenium.webdriver.firefox.options as firefox
-import toml
 from selenium import webdriver
 
-# Repo code imports
 from database import Database
+from configuration import (
+    BROWSER,
+    DATE_LIMIT,
+    FILTERS,
+    NUM_RESULTS,
+    PATHS,
+    START_URL,
+)
 from utils import check_always_accepted, too_old
 from webpage import BrandWebPage, MainWebPage, get_driver_options
 
 # ----------------------------------- Main ------------------------------------
 
-# Load configuration toml
-with open("src/configuration.toml", "r") as f:
-    conf = toml.load(f, _dict=dict)
-
-# # Setup logging
-# logging.config.fileConfig('logging.conf')
-# logger = logging.getLogger('simpleExample')
-
+# Setup logging
 logging.basicConfig(
     filename="scraper.log",
     encoding="utf-8",
@@ -35,19 +30,20 @@ logging.basicConfig(
 )
 
 # Create database if one doesn't exist
-db = Database(conf)
+db = Database(PATHS)
 
 browser_options = get_driver_options()  # Setup driver options
-if conf["browser"]["chrome"] == "True":
-    main_driver = webdriver.Chrome(
-        conf["paths"]["chromedriver"], options=browser_options
-    )
-if conf["browser"]["firefox"] == "True":
+if BROWSER == "chrome":
+    main_driver = webdriver.Chrome(PATHS["chromedriver"], options=browser_options)
+if BROWSER == "firefox":
     main_driver = webdriver.Firefox(
-        executable_path=conf["paths"]["geckodriver"], options=browser_options
+        executable_path=PATHS["geckodriver"], options=browser_options
     )
 
-webpage = MainWebPage(main_driver, conf)  # Create main webpage class
+webpage = MainWebPage(
+    main_driver,
+    START_URL,
+)  # Create main webpage class
 webpage.auto_accept_cookies()
 
 # Open main filter menu
@@ -56,7 +52,7 @@ webpage.open_all_filter_menu()
 
 # Get GPU models
 db.get_products(webpage.page_source_soup())
-db.filter_products(conf["filters"]["accepted_substrings"])
+db.filter_products(FILTERS["accepted_substrings"])
 db.write_to_db()  # Write new data to database
 
 # Main loop over all products
@@ -81,16 +77,16 @@ while not done_looping:
         print(f"Collecting data for: {gpu_model.name}")
 
         # Get number of results
-        brand_webpage = BrandWebPage(main_driver, conf)
+        brand_webpage = BrandWebPage(main_driver, START_URL, NUM_RESULTS)
         num_results, sucess = brand_webpage.get_number_of_results()
         gpu_model.num_sold = num_results
 
         data = []
-        if sucess or check_always_accepted(gpu_model.name, conf):
+        if sucess or check_always_accepted(gpu_model.name, FILTERS):
             brand_webpage.get_pages()
             next_page_exists = True
             data.extend(brand_webpage.collect_page_data())
-            while next_page_exists and not too_old(conf, data):
+            while next_page_exists and not too_old(DATE_LIMIT, data):
                 # Naviagte to the next page and collect item data
                 next_page_exists = brand_webpage.nav_to_next_page()
                 data.extend(brand_webpage.collect_page_data())

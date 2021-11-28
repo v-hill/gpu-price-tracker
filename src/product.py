@@ -2,7 +2,7 @@
 Module for EBayItem class.
 """
 
-# Python library imports
+
 import copy
 import re
 
@@ -47,9 +47,7 @@ class EBayItem:
             "div", {"class": re.compile(detail_class_str)}
         )
         self.item_details.extend(
-            self.soup_tag.find_all(
-                "span", {"class": re.compile(detail_class_str)}
-            )
+            self.soup_tag.find_all("span", {"class": re.compile(detail_class_str)})
         )
 
     def get_attribute_dict(self):
@@ -74,7 +72,7 @@ class EBayItem:
                 if key == "s-item__bidCount":
                     bids = int(re.findall(r"\d+", str(span.text))[0])
                     self.item_attributes["bids"] = bids
-        if not "postage" in self.item_attributes:
+        if "postage" not in self.item_attributes:
             self.item_attributes["postage"] = 0
 
     def get_title(self):
@@ -85,9 +83,7 @@ class EBayItem:
         """
         title_class_str = "s-item__title s-item__title--has-tags"
         try:
-            title = self.soup_tag.find(
-                "h3", {"class": re.compile(title_class_str)}
-            )
+            title = self.soup_tag.find("h3", {"class": re.compile(title_class_str)})
             title = str(title.text)
             title = remove_unicode(title)
             self.item_attributes["title"] = title
@@ -125,20 +121,14 @@ class EBayItem:
                 test_val = remove_unicode(test_val)
                 price_list = re.findall(r"\d*\.?\d+", test_val)
                 if len(price_list) != 1:
-                    raise Exception(
-                        "price list contains more than one element"
-                    )
+                    raise Exception("price list contains more than one element")
                 price_num = float(price_list[0])
                 self.item_attributes[key] = price_num
 
     def get_total_cost(self):
         try:
-            total = (
-                self.item_attributes["price"] + self.item_attributes["postage"]
-            )
+            total = self.item_attributes["price"] + self.item_attributes["postage"]
         except BaseException:
-            print(
-                self.item_attributes["price"], self.item_attributes["postage"]
-            )
+            print(self.item_attributes["price"], self.item_attributes["postage"])
         total = round(total, 2)
         self.item_attributes["total price"] = total
