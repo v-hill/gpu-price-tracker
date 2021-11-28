@@ -2,19 +2,14 @@
 Script to combine multiple database files.
 """
 
-# Python library imports
 import json
 import os
 from datetime import datetime
-import toml
-from numpy import ceil
+
+from src.configuration import PATHS
 
 strftime = datetime.strftime
 strptime = datetime.strptime
-
-# Load configuration toml
-with open("src/configuration.toml", "r") as f:
-    conf = toml.load(f, _dict=dict)
 
 
 def load_db(path):
@@ -64,7 +59,7 @@ def get_new_gpu_names(data_1, data_2):
     gpu_list1 = [gpu["name"] for gpu in data_1["collected"]]
     gpu_list2 = [gpu["name"] for gpu in data_2["collected"]]
     gpu_diff = [gpu for gpu in gpu_list2 if gpu not in gpu_list1]
-    gpu_shared = [gpu for gpu in gpu_list2 if gpu in gpu_list1]
+    # gpu_shared = [gpu for gpu in gpu_list2 if gpu in gpu_list1]
     return gpu_diff
 
 
@@ -84,7 +79,7 @@ def get_db_index(db_new, name):
     return False
 
 
-data_directory = conf["paths"]["filepath"]
+data_directory = PATHS["filepath"]
 db_new_name = "combined_gpu_db.json"
 
 filepaths = os.listdir(data_directory)
@@ -126,9 +121,7 @@ for file1 in filepaths:
                 new_entry["data"].append(item_new)
             new_entry["num_sold"] = len(new_entry["data"])
             db_new["collected"][idx] = new_entry
-            print(
-                f'    {1-(items_removed/len(gpu["data"])):0.1%} of cards added'
-            )
+            print(f'    {1-(items_removed/len(gpu["data"])):0.1%} of cards added')
     print(f'Number of GPUs in database {len(db_new["collected"])}')
     print("-" * 79)
 

@@ -2,7 +2,7 @@
 Module for graphics card class.
 """
 
-# Python library imports
+
 from datetime import datetime
 
 

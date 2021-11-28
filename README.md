@@ -17,13 +17,13 @@ https://chromedriver.chromium.org/downloads
 
 ### For Firefox:
 
-You must download the Mozilla geckodriver for the Firefox browser. 
+You must download the Mozilla geckodriver for the Firefox browser.
 
 The latest geckodriver release can be downloaded from the following site:
 
 https://github.com/mozilla/geckodriver/releases
 
-## TOML configuration:
+## TOML configuration (no longer in use, see configuration.py):
 
 ### [paths] key
 
@@ -48,7 +48,7 @@ The filepath key sets the folder which the database gets saved to.
 filepath = "C://...../Data/"
 ```
 
-The date on which the scraper is run is automatically appended to the database name (e.g. 2021_01_01_gpu_db.json). 
+The date on which the scraper is run is automatically appended to the database name (e.g. 2021_01_01_gpu_db.json).
 
 ### [browser] key
 
@@ -68,5 +68,3 @@ This is space to add additional configuration, such as disabling gpu acceleratio
 [driver_options]
 disable_gpu = "True"
 '''
-
-

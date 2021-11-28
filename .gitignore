@@ -139,3 +139,6 @@ dmypy.json
 
 # Poetry lock files
 poetry.lock
+
+configuration.py
+configuration_local.py

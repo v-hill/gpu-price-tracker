@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 
 
@@ -84,14 +85,12 @@ def clean_dataframe(df):
 def apply_dict_filters(df, card_dict, filter_title=True):
     if filter_title:
         df = df[
-            df["Product title"].str.contains(
-                card_dict["search_term"].replace("_", "")
-            )
+            df["Product title"].str.contains(card_dict["search_term"].replace("_", ""))
         ]
 
-    if card_dict["gb_required"] != False:
+    if card_dict["gb_required"] is not False:
         df = df[df["Product title"].str.contains(card_dict["gb_required"])]
-    if card_dict["gb_exclude"] != False:
+    if card_dict["gb_exclude"] is not False:
         df = df[~df["Product title"].str.contains(card_dict["gb_exclude"])]
 
     if card_dict["new"]:
@@ -154,7 +153,7 @@ def calc_weekly_prices(weeks, data1):
         df_temp = data1[(data1["Date"] < end) & (data1["Date"] > start)]
         if len(df_temp) > 3:
             mean1 = float(f"{df_temp['Total price'].mean():0.2f}")
-            stdev1 = float(f"{df_temp['Total price'].std():0.1f}")
+            # stdev1 = float(f"{df_temp['Total price'].std():0.1f}")
             print(
                 f"{start:%Y %b %d}    {len(df_temp):5} sold    "
                 "£{mean1:6} \u00B1 {stdev1}"

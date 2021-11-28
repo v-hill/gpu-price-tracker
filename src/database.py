@@ -1,13 +1,13 @@
 """
 Module for database related classes and functions.
 """
-# Python library imports
+
 import datetime
 import json
 from os import path
+
 import bs4
 
-# Repo code imports
 from graphics_card import GraphicsCard
 
 
@@ -16,18 +16,18 @@ class Database:
     Class for containing and processing all of the scraped data.
     """
 
-    def __init__(self, conf: dict):
+    def __init__(self, paths: dict):
         self.products = []
-        self.save_filepath = self.get_save_filepath(conf)
+        self.save_filepath = self.get_save_filepath(paths)
         self.make_database()
 
-    def get_save_filepath(self, conf: dict):
-        database_filename = conf["paths"]["database"]
+    def get_save_filepath(self, paths: dict):
+        database_filename = paths["database"]
         current_time = datetime.datetime.now()
         date_str = current_time.strftime("%Y_%m_%d_")
         database_filename = date_str + database_filename
 
-        datbaase_path = conf["paths"]["filepath"]
+        datbaase_path = paths["filepath"]
         save_filepath = path.join(datbaase_path, database_filename)
         return save_filepath
 
@@ -63,20 +63,13 @@ class Database:
             prod.to_dict() for prod in self.products if prod.data_collected
         ]
         dict_out["uncollected"] = [
-            prod.to_dict()
-            for prod in self.products
-            if prod.data_collected == False
+            prod.to_dict() for prod in self.products if prod.data_collected is False
         ]
         return dict_out
 
     def write_to_db(self):
         """
         Write data to database.
-
-        Parameters
-        ----------
-        conf : dict
-            configuration.toml
         """
         new_data = self.to_dict()
 
@@ -112,15 +105,13 @@ class Database:
 
     def check_exists(self, name: str):
         """
-        Test whether an entry in the json database with a given name already 
+        Test whether an entry in the json database with a given name already
         exists.
 
         Parameters
         ----------
         name : str
             'name' tag of new GPU entry
-        conf : dict
-            configuration.toml
 
         Returns
         -------
@@ -147,9 +138,7 @@ class Database:
             Soup of the page with the menu open.
         """
         menu = soup.find("div", {"class": "x-overlay__wrapper--right"})
-        options = menu.find_all(
-            "label", {"class": "x-refine__multi-select-label"}
-        )
+        options = menu.find_all("label", {"class": "x-refine__multi-select-label"})
         for entry in options:
             name = entry.text
             button_id = entry.find("input")["id"]
@@ -158,8 +147,8 @@ class Database:
 
     def filter_products(self, accepted_substrings: list):
         """
-        Filter out unwanted GPUs by selecting only products whose name 
-        contains one of the substrings listed in the 'accepted_substrings' 
+        Filter out unwanted GPUs by selecting only products whose name
+        contains one of the substrings listed in the 'accepted_substrings'
         attribute of the configuration.toml file.
 
         Parameters
