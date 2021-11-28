@@ -6,6 +6,7 @@ import logging
 import logging.config
 import re
 import sys
+import time
 
 import sqlalchemy
 from selenium import webdriver
@@ -13,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 
 from configuration import (
     BROWSER,
+    DATA_READ_RESET_HOURS,
     FILTERS,
     NUM_RESULTS,
     PATHS,
@@ -102,8 +104,17 @@ with Session() as session:
         ):
             new_gpu, _ = get_or_create(session, GPU, name=name)
             new_gpu.log_id = new_log_id
-            new_gpu.data_collected = False
             new_gpu.button_id = entry.find("input")["id"]
+
+            new_gpu.data_collected = True
+            if new_gpu.last_collection is not None:
+                diff = datetime.datetime.now() - new_gpu.last_collection
+                diff_hours = diff.seconds / 3600
+                if diff_hours >= DATA_READ_RESET_HOURS:
+                    new_gpu.data_collected = False
+            else:
+                new_gpu.data_collected = False
+
             session.add(new_gpu)
     new_log.end_time = start_time = datetime.datetime.now()
     session.commit()
@@ -132,78 +143,100 @@ def make_sales_objects(brand_webpage, session, new_log_id, uncollected_gpu):
         new_item.clean_item()
         item_kwargs = new_item.get_kwargs()
         new_sale, exists = get_or_create(session, Sale, **item_kwargs)
-        new_sale.log_id = new_log_id
-        new_sale.gpu_id = uncollected_gpu.gpu_id
+        if not exists:
+            new_sale.log_id = new_log_id
+            new_sale.gpu_id = uncollected_gpu.gpu_id
         sales_objects.append(new_sale)
         if exists:
             num_already_in_db += 1
     return sales_objects, num_already_in_db
 
 
-with Session() as session:
-    new_log = session.query(Log).filter(Log.log_id == new_log_id).first()
-    uncollected_gpu = (
-        session.query(GPU)
-        .filter(GPU.log_id == new_log_id, GPU.data_collected == False)
-        .first()
-    )
-    if uncollected_gpu is not None:
-        print("can continue")
-
-    logging.info(f"GPU: {uncollected_gpu.name}")
-
-    # Navigate to GPU page
-    webpage.return_to_start_url()
-    webpage.open_model_menu()
-    webpage.open_all_filter_menu()
-    webpage.select_option(button_id=uncollected_gpu.short_id())
-    webpage.apply_selection()
-
-    # Get number of results
-    brand_webpage = BrandWebPage(main_driver, START_URL, NUM_RESULTS)
-    num_results = brand_webpage.get_number_of_results()
-
-    # Check if data should be collected for this GPU
-    collect_data = check_num_results_bounds(
-        num_results, NUM_RESULTS
-    ) or check_always_accepted(uncollected_gpu.name, FILTERS)
-
-    if collect_data:
-        logging.info(f"    collecting data")
-        brand_webpage.get_pages()
-        next_page_exists = True
-
-        sales_objects, num_already_in_db = make_sales_objects(
-            brand_webpage,
-            session,
-            new_log_id,
-            uncollected_gpu,
+def collect_gpu_data(Session, new_log_id, webpage, main_driver):
+    with Session() as session:
+        new_log = session.query(Log).filter(Log.log_id == new_log_id).first()
+        gpu = (
+            session.query(GPU)
+            .filter(GPU.log_id == new_log_id, GPU.data_collected == False)
+            .first()
         )
+        if gpu is None:
+            return True
 
-        while next_page_exists and num_already_in_db <= 5:
-            # Naviagte to the next page and collect item data
-            next_page_exists = brand_webpage.nav_to_next_page()
-            if next_page_exists:
-                new_sales_objects, existing_items = make_sales_objects(
-                    brand_webpage,
-                    session,
-                    new_log_id,
-                    uncollected_gpu,
-                )
-                sales_objects += new_sales_objects
-                num_already_in_db += existing_items
-                print(num_already_in_db)
+        logging.info(f"GPU: {gpu.name}")
 
-        session.bulk_save_objects(sales_objects)
-        logging.info(f"    {len(sales_objects)} sales added to db")
-        new_log.end_time = start_time = datetime.datetime.now()
-        uncollected_gpu.data_collected = True
+        # Navigate to GPU page
+        webpage.return_to_start_url()
+        webpage.open_model_menu()
+        webpage.open_all_filter_menu()
+        webpage.select_option(button_id=gpu.short_id())
+        webpage.apply_selection()
+        gpu.url = webpage.driver.current_url
+
+        # Get number of results
+        brand_webpage = BrandWebPage(main_driver, START_URL, NUM_RESULTS)
+        num_results = brand_webpage.get_number_of_results()
+
+        # Check if data should be collected for this GPU
+        collect_data = check_num_results_bounds(
+            num_results, NUM_RESULTS
+        ) or check_always_accepted(gpu.name, FILTERS)
+
+        if collect_data:
+            logging.info("    collecting data")
+            brand_webpage.get_pages()
+            next_page_exists = True
+
+            sales_objects, num_already_in_db = make_sales_objects(
+                brand_webpage,
+                session,
+                new_log_id,
+                gpu,
+            )
+
+            while next_page_exists and num_already_in_db <= 5:
+                # Naviagte to the next page and collect item data
+                next_page_exists = brand_webpage.nav_to_next_page()
+                if next_page_exists:
+                    new_sales_objects, existing_items = make_sales_objects(
+                        brand_webpage,
+                        session,
+                        new_log_id,
+                        gpu,
+                    )
+                    sales_objects += new_sales_objects
+                    num_already_in_db += existing_items
+                    print(num_already_in_db)
+
+            session.bulk_save_objects(sales_objects)
+            session.commit()
+            logging.info(f"    {len(sales_objects)} sales added to db")
+
+            sales_added = (
+                session.query(Sale).filter(Sale.log_id == new_log_id).count()
+            )
+            sales_scraped = (
+                new_log.sales_scraped
+                if new_log.sales_scraped is not None
+                else 0
+            )
+            sales_scraped += len(sales_objects)
+            new_log.sales_scraped = sales_scraped
+
+            new_log.sales_added = sales_added
+            new_log.end_time = datetime.datetime.now()
+
+        gpu.data_collected = True
+        gpu.last_collection = datetime.datetime.now()
         session.commit()
+        logging.info("    completed data collection")
+    return False
 
 
-"""
-If more than 6 hours since last run, set data_collected to false for all GPU
-
-Add num scraped, num found to gpu tables
-
-"""
+completed = False
+while not completed:
+    try:
+        completed = collect_gpu_data(Session, new_log_id, webpage, main_driver)
+    except Exception as e:
+        print(e)
+        time.sleep(30)

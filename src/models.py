@@ -33,9 +33,9 @@ class Log(Base):
         Start time of scraper.
     end_time: datetime
         End time of scraper, whether completed or failed.
-    products_scraped: int
+    sales_scraped: int
         Number of products scraped during the run.
-    products_added: int
+    sales_added: int
         Number of products added to the database during the run.
     """
 
@@ -43,8 +43,8 @@ class Log(Base):
     log_id = Column(Integer, primary_key=True)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
-    products_scraped = Column(Integer)
-    products_added = Column(Integer)
+    sales_scraped = Column(Integer)
+    sales_added = Column(Integer)
 
     def __repr__(self):
         return f"{self.log_id} {self.start_time.strftime('%Y/%m/%d %H:%M:%S')}"
@@ -99,6 +99,7 @@ class GPU(Base):
     url = Column(String)
     data_collected = Column(Boolean)
     button_id = Column(String)
+    last_collection = Column(DateTime)
 
     def __repr__(self):
         return self.name

@@ -13,9 +13,9 @@ DRIVER_OPTIONS = {"disable_gpu": True}
 
 NUM_RESULTS = {"max": 5000, "min": 20}
 
-DATE_LIMIT = {"oldest": "2021-01-01"}
-
 FILTERS = {
     "accepted_substrings": ["GTX", "RTX"],
     "always_accept": ["3060", "3070", "3080", "3090"],
 }
+
+DATA_READ_RESET_HOURS = 6
