@@ -25,19 +25,29 @@ class EBayItem:
             repr_string += f"{key:<12}: {val} \n"
         return repr_string
 
-    def to_dict(self):
+    def clean_item(self):
+        self.get_details()
+        self.get_attribute_dict()
+        self.get_title()
+        self.parse_date()
+        self.sort_price_details()
+        self.get_total_cost()
+        for key, val in self.item_attributes.items():
+            logging.debug(f"{key:<12}: {val}")
+        logging.debug("-" * 60)
+
+    def get_kwargs(self):
         """
-        Create a dictionary representation of the EBayItem for saving to json.
+        Create a dictionary representation of the EBayItem for saving to the
+        Sale table of the SQL database.
 
         Returns
         -------
-        attrs_dict : dict
+        kwargs : dict
             Dictionary of EBayItem instance.
         """
-        attrs_dict = copy.deepcopy(self.item_attributes)
-        date_str = attrs_dict["date"].strftime("%Y-%m-%d %H:%M:%S")
-        attrs_dict["date"] = date_str
-        return attrs_dict
+        kwargs = copy.deepcopy(self.item_attributes)
+        return kwargs
 
     def get_details(self):
         """
@@ -143,4 +153,4 @@ class EBayItem:
                 f" {self.item_attributes['postage']}"
             )
         total = round(total, 2)
-        self.item_attributes["total price"] = total
+        self.item_attributes["total_price"] = total

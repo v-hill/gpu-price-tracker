@@ -2,42 +2,6 @@
 Module for miscellaneous utilities.
 """
 
-import logging
-from datetime import datetime
-
-
-def too_old(date_limit: dict, data_items: list):
-    """
-    Given the date_limit in the configuration.toml file, test whether the
-    items in the data_items list are older than this limit.
-
-    Parameters
-    ----------
-    date_limit : dict
-        The dictionary of limits for how old an item can be and still be added
-        to the database.
-    data_items : list
-        List of EbayItem objects.
-
-    Returns
-    -------
-    bool
-        True if there are items in data_items which are older than the date
-        limit from the .toml config.
-    """
-    date_limit_str = date_limit["oldest"]
-    date_limit = datetime.strptime(date_limit_str, "%Y-%m-%d")
-    oldest_sale = datetime.now()
-    for item in data_items:
-        if item.item_attributes["date"] < oldest_sale:
-            oldest_sale = item.item_attributes["date"]
-    if oldest_sale < date_limit:
-        logging.debug(
-            f"    oldest: {oldest_sale}, limit: {date_limit}"
-        )  # For debug
-        return True
-    return False
-
 
 def check_always_accepted(name: str, filters: dict):
     """
@@ -62,6 +26,16 @@ def check_always_accepted(name: str, filters: dict):
     return False
 
 
+def check_num_results_bounds(num_results: int, num_results_limits: dict):
+    if num_results <= num_results_limits["min"]:
+        return False
+    if num_results >= num_results_limits["max"]:
+        raise Exception(
+            "Too many results found, navigation to GPU page unsuccessful"
+        )
+    return True
+
+
 def remove_unicode(input_string: str):
     """
     Function that takes in a string and removes any unicode characters.
@@ -79,3 +53,43 @@ def remove_unicode(input_string: str):
     strencode = input_string.encode("ascii", "ignore")
     strdecode = strencode.decode()
     return strdecode
+
+
+def convert_timedelta(duration):
+    days, seconds = duration.days, duration.seconds
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return days, hours, minutes, seconds
+
+
+def generate_time_since_str(days, hours, minutes, seconds):
+    time_since_str = "    "
+    if days > 1:
+        time_since_str += f"{days} days "
+    elif days == 1:
+        time_since_str += f"{days} day "
+    if hours > 1 or hours == 0:
+        time_since_str += f"{hours} hours "
+    elif hours == 1:
+        time_since_str += f"{hours} hour "
+    if minutes > 1 or minutes == 0:
+        time_since_str += f"{minutes} minutes "
+    elif minutes == 1:
+        time_since_str += f"{minutes} minute "
+    if days == 0 and hours == 0 and minutes <= 30:
+        if seconds > 1 or seconds == 0:
+            time_since_str += f"{seconds} seconds "
+        elif seconds == 1:
+            time_since_str += f"{seconds} second "
+    time_since_str += "since last run"
+    return time_since_str
+
+
+def get_or_create(session, model, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance, True
+    else:
+        instance = model(**kwargs)
+        return instance, False
