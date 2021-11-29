@@ -11,7 +11,6 @@ import selenium.webdriver.firefox.options as firefox
 from bs4 import BeautifulSoup
 
 from configuration import BROWSER, DRIVER_OPTIONS
-from graphics_card import GraphicsCard
 from product import EBayItem
 
 # -----------------------------------------------------------------------------
@@ -143,7 +142,20 @@ class MainWebPage(WebPage):
         else:
             raise Exception("Error: No see all menu button found in page")
 
-    def select_option(self, product: GraphicsCard):
+    def get_brand_menu_items(self):
+        """
+        Given the Chipset/GPU Model menu, create a list of entries for the gpu
+        table for the set of available products in the menu.
+        """
+        menu = self.page_source_soup().find(
+            "div", {"class": "x-overlay__wrapper--right"}
+        )
+        options = menu.find_all(
+            "label", {"class": "x-refine__multi-select-label"}
+        )
+        return options
+
+    def select_option(self, button_id: str):
         """
         Select an option from the menu given a GraphicsCard object.
         Keeps trying to select option until successful for 10 seconds.
@@ -156,7 +168,6 @@ class MainWebPage(WebPage):
         START_TIME = time.time()
         while (time.time() - START_TIME) <= 10:
             try:
-                button_id = product.short_id()
                 option_button = self.driver.find_element_by_css_selector(
                     f'[id*="{button_id}"]'
                 )
@@ -166,9 +177,7 @@ class MainWebPage(WebPage):
             except BaseException:
                 time.sleep(1)
         if True:
-            raise Exception(
-                f"Could not select option from the menu: {product.name}"
-            )
+            raise Exception("Unable to select option from the brands menu")
 
     def apply_selection(self):
         """
@@ -227,8 +236,6 @@ class BrandWebPage(WebPage):
         -------
         num_results : int
             The number of results on the page.
-        bool
-            True if the number of results value is within the correct range.
         """
         soup = self.page_source_soup()
         num_results = soup.find_all(
@@ -241,15 +248,8 @@ class BrandWebPage(WebPage):
         num_results_str = str(num_results[0].text).replace(",", "")
         num_results = int(re.findall(r"\d+", num_results_str)[0])
         logging.info(f"    {num_results} results found")
-
-        if num_results <= self.num_results_limits["min"]:
-            return num_results, False
-        if num_results >= self.num_results_limits["max"]:
-            raise Exception(
-                "Too many results found, navigation to GPU page unsuccessful"
-            )
         self.num_results = num_results
-        return num_results, True
+        return num_results
 
     def get_pages(self):
         """
@@ -318,30 +318,5 @@ class BrandWebPage(WebPage):
         )
         if len(item_tags) == 0:
             raise Exception("No items found on page")
+
         return [EBayItem(tag) for tag in item_tags]
-
-    def collect_page_data(self):
-        """
-        Collect the data for every item on the webpage.
-
-        Returns
-        -------
-        items : list
-            List of EBayItem objects.
-        """
-        item_tags = self.make_items()
-        if len(item_tags) == 0:
-            raise Exception("No items found on page")
-        items = []
-        for item in item_tags:
-            item.get_details()
-            item.get_attribute_dict()
-            item.get_title()
-            item.parse_date()
-            item.sort_price_details()
-            item.get_total_cost()
-            items.append(item)
-            for key, val in item.item_attributes.items():
-                logging.debug(f"{key:<12}: {val}")
-            logging.debug("-" * 60)
-        return items

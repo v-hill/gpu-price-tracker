@@ -2,7 +2,7 @@ START_URL = "https://www.ebay.co.uk/b/Computer-Graphics-Video-Cards/27386/bn_661
 
 PATHS = {
     "chromedriver": "C:/user/chromedriver.exe",
-    "database": "gpu_db.json",
+    "database": "gpu.db",
     "filepath": "C:/user/Data/",
     "geckodriver": "C:/user/geckodriver.exe",
 }
@@ -13,9 +13,9 @@ DRIVER_OPTIONS = {"disable_gpu": True}
 
 NUM_RESULTS = {"max": 5000, "min": 20}
 
-DATE_LIMIT = {"oldest": "2021-01-01"}
-
 FILTERS = {
     "accepted_substrings": ["GTX", "RTX"],
     "always_accept": ["3060", "3070", "3080", "3090"],
 }
+
+DATA_READ_RESET_HOURS = 6
