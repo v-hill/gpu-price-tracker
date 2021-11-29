@@ -23,48 +23,52 @@ The latest geckodriver release can be downloaded from the following site:
 
 https://github.com/mozilla/geckodriver/releases
 
-## TOML configuration (no longer in use, see configuration.py):
-
-### [paths] key
+## Configuration
+### PATHS (dict)
 
 
 Set the location of your chromedriver or geckodriver path in the configuration.toml file. The entry to edit is:
 
 ```
   [paths]
-  chromedriver = "C:/{your path here}/"
-  geckodriver = "C:/{your path here}/"
+  chromedriver = "C:/{your path here}/chromedriver.exe"
+  geckodriver = "C:/{your path here}/geckodriver.exe"
 ```
 
 The name of the database is set by the following entry:
 ```
 [paths]
-database = "gpu_db.json"
+database = "gpu.db"
 ```
+The database is created in the root of the project directory.
 
-The filepath key sets the folder which the database gets saved to.
-```
-[paths]
-filepath = "C://...../Data/"
-```
+### BROWSER (str)
 
-The date on which the scraper is run is automatically appended to the database name (e.g. 2021_01_01_gpu_db.json).
-
-### [browser] key
-
-Then set the approripate broswer flag in the configuration file to True. For example, when using Firefox, the config should be as follows:
+Then set the web broswer for Selenium to use. 
+Currently supports Firefox and Chrome.
 
 ```
-  [browser]
-  chrome = "False"
-  firefox = "True"
+BROWSER = "firefox"  # also available "chrome"
 ```
 
-### [driver_options] key
+### DRIVER_OPTIONS (dict)
 
 This is space to add additional configuration, such as disabling gpu acceleration in the browser.
 
-'''
-[driver_options]
-disable_gpu = "True"
-'''
+```
+DRIVER_OPTIONS = {"disable_gpu": True}
+```
+
+### NUM_RESULTS (dict)
+
+The 'max' value sets the maximum number of results on a page, without raising an exception.
+Typically there are around ~17,000 results on the start url. After navigating to a particular GPU this number is significantly lower, no more than a few hundred results.
+If the scraper navigates to a page and there are ~17,000 results, an error has occured and the correct buttons have not been pressed. To account for changes in the number of results, the default max limit is set at 5000.
+
+
+The 'min' value specifies the lowest number of results to still be added to the database. If the number of results for a GPU is below the minimum, no data is collected.
+
+```
+NUM_RESULTS = {"max": 5000, "min": 20}
+```
+
