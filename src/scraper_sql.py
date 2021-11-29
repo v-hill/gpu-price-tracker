@@ -163,7 +163,7 @@ def collect_gpu_data(Session, new_log_id, webpage, main_driver):
         if gpu is None:
             return True
 
-        logging.info(f"GPU: {gpu.name}")
+        logging.info(gpu.name)
 
         # Navigate to GPU page
         webpage.return_to_start_url()
@@ -183,7 +183,6 @@ def collect_gpu_data(Session, new_log_id, webpage, main_driver):
         ) or check_always_accepted(gpu.name, FILTERS)
 
         if collect_data:
-            logging.info("    collecting data")
             brand_webpage.get_pages()
             next_page_exists = True
 
@@ -206,15 +205,18 @@ def collect_gpu_data(Session, new_log_id, webpage, main_driver):
                     )
                     sales_objects += new_sales_objects
                     num_already_in_db += existing_items
-                    print(num_already_in_db)
+                    logging.debug(
+                        f"    {num_already_in_db} sales already in db"
+                    )
 
             session.bulk_save_objects(sales_objects)
             session.commit()
-            logging.info(f"    {len(sales_objects)} sales added to db")
 
             sales_added = (
                 session.query(Sale).filter(Sale.log_id == new_log_id).count()
             )
+            logging.info(f"    {sales_added} sales added to db")
+
             sales_scraped = (
                 new_log.sales_scraped
                 if new_log.sales_scraped is not None
@@ -234,9 +236,11 @@ def collect_gpu_data(Session, new_log_id, webpage, main_driver):
 
 
 completed = False
-while not completed:
+failures = 0
+while not completed and failures <= 5:
     try:
         completed = collect_gpu_data(Session, new_log_id, webpage, main_driver)
     except Exception as e:
-        print(e)
+        logging.exception("Error while collecting gpu data:\n%s" % e)
+        failures += 1
         time.sleep(30)

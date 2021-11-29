@@ -2,7 +2,7 @@ START_URL = "https://www.ebay.co.uk/b/Computer-Graphics-Video-Cards/27386/bn_661
 
 PATHS = {
     "chromedriver": "C:/user/chromedriver.exe",
-    "database": "gpu_db.json",
+    "database": "gpu.db",
     "filepath": "C:/user/Data/",
     "geckodriver": "C:/user/geckodriver.exe",
 }
