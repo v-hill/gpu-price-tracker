@@ -16,7 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 
-from utils import convert_timedelta, generate_time_since_str
+from src.utils import convert_timedelta, generate_time_since_str
 
 Base = declarative_base()
 

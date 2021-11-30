@@ -1,8 +1,6 @@
 """
 Module for EBayItem class.
 """
-
-
 import copy
 import logging
 import re

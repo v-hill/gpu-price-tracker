@@ -142,5 +142,6 @@ poetry.lock
 
 configuration.py
 configuration_local.py
+scratch*
 
 *.db

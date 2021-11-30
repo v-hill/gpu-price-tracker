@@ -4,7 +4,7 @@ Module for database related classes and functions.
 import logging
 from os import path
 
-from models import Base
+from src.models import Base
 
 
 class Scraper:

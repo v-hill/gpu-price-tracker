@@ -1,7 +1,6 @@
 """
 Module for webpage related classes.
 """
-
 import logging
 import re
 import time
