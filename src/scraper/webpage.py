@@ -5,33 +5,9 @@ import logging
 import re
 import time
 
-import selenium.webdriver.chrome.options as chrome
-import selenium.webdriver.firefox.options as firefox
 from bs4 import BeautifulSoup
 
-from configuration import BROWSER, DRIVER_OPTIONS
 from scraper.product import EBayItem
-
-# -----------------------------------------------------------------------------
-
-
-def get_driver_options():
-    logging.info(f"{BROWSER} browser selected")
-    if BROWSER == "chrome":
-        browser_options = chrome.Options()
-    if BROWSER == "firefox":
-        browser_options = firefox.Options()
-    else:
-        raise Exception(f"Browser {BROWSER} is not 'chrome' or 'firefox'")
-    browser_options.add_argument(
-        "--disable-blink-features=AutomationControlled"
-    )
-    if bool(DRIVER_OPTIONS["disable_gpu"]):
-        browser_options.add_argument("--disable-gpu")  # Disable GPU
-    return browser_options
-
-
-# -----------------------------------------------------------------------------
 
 
 class WebPage:
@@ -67,6 +43,8 @@ class WebPage:
         """
         return BeautifulSoup(self.driver.page_source, "html.parser")
 
+    def close_webpage(self):
+        self.driver.close()
 
 # -----------------------------------------------------------------------------
 
