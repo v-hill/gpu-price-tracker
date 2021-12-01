@@ -16,10 +16,12 @@ from src.utils import get_or_create
 engine = sqlalchemy.create_engine(f"sqlite:///{PATHS['database']}")
 Session = sessionmaker(bind=engine)
 
+
 def load_db(path):
     with open(path) as f:
         db = json.load(f)
     return db
+
 
 def import_json_data(raw_data_filepath):
     filepaths = os.listdir(raw_data_filepath)
