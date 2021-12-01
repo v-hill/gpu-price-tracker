@@ -10,7 +10,7 @@ import selenium.webdriver.firefox.options as firefox
 from bs4 import BeautifulSoup
 
 from configuration import BROWSER, DRIVER_OPTIONS
-from product import EBayItem
+from scraper.product import EBayItem
 
 # -----------------------------------------------------------------------------
 

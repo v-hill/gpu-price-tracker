@@ -4,10 +4,14 @@ Main scraper executable.
 import datetime
 import logging
 import logging.config
+import os
 import re
 import sys
 import time
+from os import path
 
+import selenium.webdriver.chrome.options as chrome
+import selenium.webdriver.firefox.options as firefox
 import sqlalchemy
 from selenium import webdriver
 from sqlalchemy.orm import sessionmaker
@@ -15,86 +19,95 @@ from sqlalchemy.orm import sessionmaker
 from configuration import (
     BROWSER,
     DATA_READ_RESET_HOURS,
+    DRIVER_OPTIONS,
     FILTERS,
     NUM_RESULTS,
     PATHS,
     START_URL,
 )
-from database import Scraper
-from models import GPU, Log, Sale
-from product import EBayItem
-from utils import (
+from scraper.database import Scraper
+from scraper.models import GPU, Base, Log, Sale
+from scraper.product import EBayItem
+from scraper.utils import (
     check_always_accepted,
     check_num_results_bounds,
     get_or_create,
     remove_unicode,
 )
-from webpage import BrandWebPage, MainWebPage, get_driver_options
+from scraper.webpage import BrandWebPage, MainWebPage, get_driver_options
 
-# ------------------------------- Logging setup -------------------------------
 
-# Setup logging
-logging.basicConfig(
-    filename="scraper.log",
-    filemode="a",
-    format="%(asctime)s | %(levelname)s | %(message)s",
-    datefmt="%Y/%m/%d %H:%M:%S",
-    level=logging.INFO,
-)
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-logging.info("----  Started scraper.py script  ----")
-
-# --------------------------------- Log setup ---------------------------------
-
-engine = sqlalchemy.create_engine(
-    f"sqlite:///{PATHS['database']}",
-    echo=True,
-    future=True,
-)
-engine = sqlalchemy.create_engine(f"sqlite:///{PATHS['database']}")
-
-# instantiate an instance of the Database class
-scraper = Scraper(engine=engine, database_path=PATHS["database"])
-
-# Make a new Log entry for the current run and get the log_id
-Session = sessionmaker(bind=engine)
-new_log_id = Log.get_new_log(Session)
-
-# ------------------------------- Browser setup -------------------------------
-
-browser_options = get_driver_options()  # Setup driver options
-if BROWSER == "chrome":
-    main_driver = webdriver.Chrome(
-        PATHS["chromedriver"], options=browser_options
+def get_driver_options():
+    logging.info(f"{BROWSER} browser selected")
+    if BROWSER == "chrome":
+        browser_options = chrome.Options()
+    if BROWSER == "firefox":
+        browser_options = firefox.Options()
+    else:
+        raise Exception(f"Browser {BROWSER} is not 'chrome' or 'firefox'")
+    browser_options.add_argument(
+        "--disable-blink-features=AutomationControlled"
     )
-if BROWSER == "firefox":
-    main_driver = webdriver.Firefox(
-        executable_path=PATHS["geckodriver"], options=browser_options
-    )
+    if bool(DRIVER_OPTIONS["disable_gpu"]):
+        browser_options.add_argument("--disable-gpu")  # Disable GPU
+    return browser_options
 
-# ---------------------------- Main Webpage setup -----------------------------
 
-webpage = MainWebPage(
-    main_driver,
-    START_URL,
-)  # Create main webpage class
-webpage.auto_accept_cookies()
+def get_main_webdriver():
+    browser_options = get_driver_options()  # Setup driver options
+    if BROWSER == "chrome":
+        main_driver = webdriver.Chrome(
+            PATHS["chromedriver"], options=browser_options
+        )
+    if BROWSER == "firefox":
+        main_driver = webdriver.Firefox(
+            executable_path=PATHS["geckodriver"], options=browser_options
+        )
+    return main_driver
 
-# --------------------- Collect info on available products --------------------
 
-# Open main filter menu
-webpage.open_model_menu()
-webpage.open_all_filter_menu()
+def get_engine(database_path, quite=True):
+    if quite:
+        engine = sqlalchemy.create_engine(f"sqlite:///{database_path}")
+    else:
+        engine = sqlalchemy.create_engine(
+            f"sqlite:///{database_path}",
+            echo=True,
+            future=True,
+        )
+    return engine
 
-# Get GPU models available in the menu
-menu_items = webpage.get_brand_menu_items()
 
-accepted_substrings = FILTERS["accepted_substrings"]
-if not isinstance(accepted_substrings, list):
-    raise Exception("'accepted_substrings' must be of type list")
+def create_database(engine, database_path):
+    """
+    Create sqlite database if no current database exists.
+    """
+    if path.exists(database_path):
+        logging.info(f"Database already exists at: {database_path}")
+    else:
+        logging.info(f"Creating database at: {database_path}")
+        Base.metadata.create_all(engine)
 
-# Add menu items to GPU table
-with Session() as session:
+
+def delete_database(database_path):
+    """
+    Delete an existing sqlite database if the database exists.
+    """
+    if os.path.exists(database_path):
+        os.remove(database_path)
+
+
+def get_accepted_substrings():
+    accepted_substrings = FILTERS["accepted_substrings"]
+    if not isinstance(accepted_substrings, list):
+        raise Exception("'accepted_substrings' must be of type list")
+    return accepted_substrings
+
+
+def populate_gpu_table_from_menu(
+    session, new_log_id, menu_items, accepted_substrings
+):
+    # Add menu items to GPU table
     new_log = session.query(Log).filter(Log.log_id == new_log_id).first()
     for entry in menu_items:
         name = entry.text
@@ -116,10 +129,11 @@ with Session() as session:
                 new_gpu.data_collected = False
 
             session.add(new_gpu)
-    new_log.end_time = start_time = datetime.datetime.now()
+    new_log.end_time = datetime.datetime.now()
     session.commit()
     gpus_added = session.query(GPU).filter(GPU.log_id == new_log_id).count()
     logging.info(f"{gpus_added} GPUs found")
+
 
 # --------------------------------- Main loop ---------------------------------
 
@@ -235,12 +249,12 @@ def collect_gpu_data(Session, new_log_id, webpage, main_driver):
     return False
 
 
-completed = False
-failures = 0
-while not completed and failures <= 5:
-    try:
-        completed = collect_gpu_data(Session, new_log_id, webpage, main_driver)
-    except Exception as e:
-        logging.exception("Error while collecting gpu data:\n%s" % e)
-        failures += 1
-        time.sleep(30)
+# completed = False
+# failures = 0
+# while not completed and failures <= 5:
+#     try:
+#         completed = collect_gpu_data(Session, new_log_id, webpage, main_driver)
+#     except Exception as e:
+#         logging.exception("Error while collecting gpu data:\n%s" % e)
+#         failures += 1
+#         time.sleep(30)

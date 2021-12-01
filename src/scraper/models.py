@@ -16,7 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 
-from src.utils import convert_timedelta, generate_time_since_str
+from scraper.utils import convert_timedelta, generate_time_since_str
 
 Base = declarative_base()
 
@@ -50,7 +50,7 @@ class Log(Base):
         return f"{self.log_id} {self.start_time.strftime('%Y/%m/%d %H:%M:%S')}"
 
     @classmethod
-    def get_new_log(cls, Session):
+    def get_new_log(cls, session):
         """
         Get the most recent log from the Log table.
         Print the start_time of previous log and time since last run.
@@ -58,31 +58,28 @@ class Log(Base):
         Iterate log id by 1
         Create new log to use for this run of the scraper.
         """
-        with Session() as session:
-            most_recent_log = (
-                session.query(cls)
-                .order_by(sqlalchemy.desc(cls.log_id))
-                .first()
+        most_recent_log = (
+            session.query(cls).order_by(sqlalchemy.desc(cls.log_id)).first()
+        )
+        if most_recent_log is not None:
+            diff = datetime.datetime.now() - most_recent_log.start_time
+            days, hours, minutes, seconds = convert_timedelta(diff)
+            time_since_str = generate_time_since_str(
+                days, hours, minutes, seconds
             )
-            if most_recent_log is not None:
-                diff = datetime.datetime.now() - most_recent_log.start_time
-                days, hours, minutes, seconds = convert_timedelta(diff)
-                time_since_str = generate_time_since_str(
-                    days, hours, minutes, seconds
-                )
-                logging.info(
-                    "Previous Log entry: "
-                    f"{most_recent_log.start_time.strftime('%Y/%m/%d %H:%M:%S')}"
-                )
-                logging.info(time_since_str)
+            logging.info(
+                "Previous Log entry: "
+                f"{most_recent_log.start_time.strftime('%Y/%m/%d %H:%M:%S')}"
+            )
+            logging.info(time_since_str)
 
-                new_log_id = most_recent_log.log_id + 1
-                new_log = cls(
-                    log_id=new_log_id, start_time=datetime.datetime.now()
-                )
-            else:
-                logging.info("No previous runs on Log")
-                new_log = cls(log_id=1, start_time=datetime.datetime.now())
+            new_log_id = most_recent_log.log_id + 1
+            new_log = cls(
+                log_id=new_log_id, start_time=datetime.datetime.now()
+            )
+        else:
+            logging.info("No previous runs on Log")
+            new_log = cls(log_id=1, start_time=datetime.datetime.now())
         session.add(new_log)
         session.commit()
         return new_log.log_id

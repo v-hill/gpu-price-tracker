@@ -8,7 +8,7 @@ import re
 import bs4
 import pandas as pd
 
-from utils import remove_unicode
+from scraper.utils import remove_unicode
 
 
 class EBayItem:
