@@ -137,7 +137,7 @@ class EBayItem:
                     raise Exception(
                         "price list contains more than one element"
                     )
-                price_num = float(price_list[0])
+                price_num = round(float(price_list[0]), 2)
                 self.item_attributes[key] = price_num
 
     def get_total_cost(self):

@@ -1,6 +1,7 @@
 """
 Module for miscellaneous utilities.
 """
+import re
 
 
 def check_always_accepted(name: str, filters: dict):
@@ -93,3 +94,20 @@ def get_or_create(session, model, **kwargs):
     else:
         instance = model(**kwargs)
         return instance, False
+
+
+def sort_price_str(price):
+    try:
+        price_num = float(price)
+        return price
+    except:
+        test_val = str(price).replace(",", "")
+        if any(map(test_val.lower().__contains__, ["free", "collect"])):
+            price_num = float(0)
+        else:
+            test_val = remove_unicode(test_val)
+            price_list = re.findall(r"\d*\.?\d+", test_val)
+            if len(price_list) != 1:
+                raise Exception("price list contains more than one element")
+            price_num = float(price_list[0])
+        return price_num

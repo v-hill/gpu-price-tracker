@@ -6,15 +6,8 @@ import json
 import os
 from datetime import datetime
 
-import sqlalchemy
-from sqlalchemy.orm import sessionmaker
-
-from src.configuration import PATHS
-from src.models import GPU, Log, Sale
-from src.utils import get_or_create
-
-engine = sqlalchemy.create_engine(f"sqlite:///{PATHS['database']}")
-Session = sessionmaker(bind=engine)
+from scraper.models import GPU, Log, Sale
+from scraper.utils import get_or_create, sort_price_str
 
 
 def load_db(path):
@@ -23,7 +16,7 @@ def load_db(path):
     return db
 
 
-def import_json_data(raw_data_filepath):
+def import_json_data(Session, raw_data_filepath):
     filepaths = os.listdir(raw_data_filepath)
     filepaths = [f for f in filepaths if ".json" in f]
     filepaths = [f for f in filepaths if "combined" not in f]
@@ -90,7 +83,19 @@ def import_json_data(raw_data_filepath):
 
                         sale_items_list = []
                         for item in gpu["data"]:
-                            item["total_price"] = item.pop("total price")
+                            del item["total price"]
+                            if "postage" not in item:
+                                item["postage"] = 0
+                            else:
+                                item["postage"] = round(
+                                    sort_price_str(item["postage"]), 2
+                                )
+                            item["price"] = round(
+                                sort_price_str(item["price"]), 2
+                            )
+                            item["total_price"] = round(
+                                (item["price"] + item["postage"]), 2
+                            )
                             item["date"] = datetime.strptime(
                                 item["date"], "%Y-%m-%d %H:%M:%S"
                             )
@@ -136,7 +141,6 @@ def import_json_data(raw_data_filepath):
                         sale_objs_list = []
                         sale_cols = [
                             "bids",
-                            "postage",
                             "total price",
                             "title",
                             "date",
@@ -144,11 +148,22 @@ def import_json_data(raw_data_filepath):
                         ]
                         for item in gpu["data"]:
                             sale_kwargs = {k: item[k] for k in sale_cols}
+                            del sale_kwargs["total price"]
+                            if "postage" not in sale_kwargs:
+                                sale_kwargs["postage"] = 0
+                            else:
+                                sale_kwargs["postage"] = round(
+                                    sort_price_str(sale_kwargs["postage"]), 2
+                                )
+                            sale_kwargs["price"] = round(
+                                sort_price_str(sale_kwargs["price"]), 2
+                            )
+                            sale_kwargs["total_price"] = round(
+                                sale_kwargs["price"] + sale_kwargs["postage"],
+                                2,
+                            )
                             sale_kwargs["date"] = datetime.strptime(
                                 sale_kwargs["date"], "%Y-%m-%d %H:%M:%S"
-                            )
-                            sale_kwargs["total_price"] = sale_kwargs.pop(
-                                "total price"
                             )
 
                             sale_obj, exists = get_or_create(

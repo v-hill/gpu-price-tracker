@@ -201,6 +201,7 @@ def add_page_url_to_gpu(Session, webpage, new_log_id):
             .first()
         )
         gpu.url = webpage.driver.current_url
+        session.commit()
 
 
 def accepted_gpu(Session, num_results, new_log_id):
@@ -279,6 +280,7 @@ def collect_data(Session, new_log_id, brand_webpage):
         session.commit()
         logging.info("    Completed data collection")
 
+
 def skip_collection(Session, new_log_id):
     with Session() as session:
         gpu = (
@@ -290,6 +292,7 @@ def skip_collection(Session, new_log_id):
         gpu.last_collection = datetime.datetime.now()
         session.commit()
         logging.info("    Skipping data collection")
+
 
 def process_gpu(Session, new_log_id, webpage, main_webdriver):
     if not data_left_to_collect(Session, new_log_id):
