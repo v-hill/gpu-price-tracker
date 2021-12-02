@@ -6,7 +6,7 @@ import logging
 import logging.config
 import os
 import re
-from os import path
+import shutil
 
 import selenium.webdriver.chrome.options as chrome
 import selenium.webdriver.firefox.options as firefox
@@ -62,36 +62,47 @@ def get_main_webdriver():
     return main_webdriver
 
 
-def get_engine(database_path, quite=True):
+def get_engine(database_filename, quite=True):
     if quite:
-        engine = sqlalchemy.create_engine(f"sqlite:///{database_path}")
+        engine = sqlalchemy.create_engine(f"sqlite:///{database_filename}")
     else:
         engine = sqlalchemy.create_engine(
-            f"sqlite:///{database_path}",
+            f"sqlite:///{database_filename}",
             echo=True,
             future=True,
         )
     return engine
 
 
-def create_database(engine, database_path):
+def create_database(engine, database_filename):
     """
     Create sqlite database if no current database exists.
     """
-    if path.exists(database_path):
-        logging.info(f"    Database already exists at: {database_path}")
+    if os.path.exists(database_filename):
+        logging.info(f"    Database already exists at: {database_filename}")
     else:
-        logging.info(f"    Creating database at: {database_path}")
+        logging.info(f"    Creating database at: {database_filename}")
         Base.metadata.create_all(engine)
 
 
-def delete_database(database_path):
+def delete_database(database_filename):
     """
     Delete an existing sqlite database if the database exists.
     """
-    logging.info(f"    Deleting database at: {database_path}")
-    if os.path.exists(database_path):
-        os.remove(database_path)
+    logging.info(f"    Deleting database at: {database_filename}")
+    if os.path.exists(database_filename):
+        os.remove(database_filename)
+
+
+def backup_database(database_filename):
+    """
+    Backup an existing database with a timestamp.
+    """
+    logging.info(f"    Deleting database at: {database_filename}")
+    if os.path.exists(database_filename):
+        new_database_filename = f"{datetime.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}_{database_filename}"
+        logging.info(f"    Backing up database to: {new_database_filename}")
+        shutil.copy(database_filename, new_database_filename)
 
 
 def get_accepted_substrings():

@@ -8,9 +8,10 @@ import time
 
 from sqlalchemy.orm import sessionmaker
 
-from configuration import PATHS, START_URL
+from configuration import DATABASE_NAME, START_URL
 from scraper.models import Log
 from scraper.scraper import (
+    backup_database,
     create_database,
     delete_database,
     get_accepted_substrings,
@@ -38,12 +39,13 @@ logging.info(" --- Started main.py --- ")
 
 logging.info("Setting up database")
 
-database_path = PATHS["database"]
-engine = get_engine(database_path, quite=True)
+database_filename = DATABASE_NAME
+engine = get_engine(database_filename, quite=True)
 Session = sessionmaker(bind=engine)
 
 # delete_database(database_path)
-create_database(engine, database_path)
+backup_database(database_filename)
+create_database(engine, database_filename)
 
 # ------------------------------- Webpage setup -------------------------------
 

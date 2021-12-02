@@ -145,3 +145,4 @@ configuration_local.py
 scratch*
 
 *.db
+*.xlsx
