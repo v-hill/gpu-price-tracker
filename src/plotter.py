@@ -7,61 +7,35 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from numpy import ceil
-
-from src.configuration import PATHS
+import pandas as pd
+from sqlalchemy import create_engine
+from configuration import DATABASE_NAME
+from configuration import PATHS
 
 # Load plotting spec file
-spec_filepath = "analysis/gpu_plots.json"
+spec_filepath = "src/analysis/gpu_plots.json"
 with open(spec_filepath) as input_file:
     plots_dict = json.load(input_file)
 
 # Load in database
-database_filename = "combined_gpu_db.json"
-files = os.listdir(PATHS["filepath"])
-if database_filename not in files:
-    raise Exception(f"{database_filename} is not in the data folder")
-database_filepath = os.path.join(PATHS["filepath"], database_filename)
-with open(database_filepath) as input_file:
-    data = json.load(input_file)
 
-df = pd.json_normalize(
-    data=data["collected"],
-    record_path="data",
-    meta=[
-        "name",
-        "collection_time",
-        "num_sold",
-    ],
-)
 
-# clean price, postage and total price
-cols_float = ["price", "postage"]
-df[cols_float] = df[cols_float].astype(str)
-df_cols = df[cols_float].copy()
-df[df_cols.columns] = df_cols.apply(
-    lambda x: x.str.encode("ascii", "ignore").str.decode("ascii")
-)
-df[cols_float] = df[cols_float].apply(pd.to_numeric, errors="coerce")
-df[cols_float] = df[cols_float].fillna(0)
-df["total price"] = df["price"] + df["postage"]
+# SQLAlchemy connectable
+cnx = create_engine(f"sqlite:///{DATABASE_NAME}").connect()
 
-# clean title
-cols_str = ["title"]
-df[cols_str] = df[cols_str].astype(str)
-df_cols = df[cols_str].copy()
-df[df_cols.columns] = df_cols.apply(
-    lambda x: x.str.encode("ascii", "ignore").str.decode("ascii")
-)
+df_log = pd.read_sql_table("log", cnx)  # Log table
+df_gpu = pd.read_sql_table("gpu", cnx)  # GPU table
+df_sale = pd.read_sql_table("sale", cnx)  # Sale table
 
-# clean dates
-df["date"] = pd.to_datetime(df["date"])
-df["collection_time"] = pd.to_datetime(df["collection_time"])
+df = df_sale.merge(df_gpu, on=['gpu_id'], how = 'left')
 
-# clean num_sold
-df["num_sold"] = df["num_sold"].astype(int)
 
 # remove duplicate entries
-df = df.drop_duplicates(subset=["bids", "price", "postage", "title", "date", "name"])
+print(df.shape)
+df = df.drop_duplicates(
+    subset=["bids", "price", "postage", "title", "date", "name"]
+)
+print(df.shape)
 
 
 def remove_outliers(df, col):
@@ -77,10 +51,16 @@ def remove_outliers(df, col):
 
 
 def apply_dict_filters(df, card_dict, filter_title=True, clean_outliers=True):
-    df = df[df["name"].str.contains(card_dict["search_term"].replace("_", " "))]
+    df = df[
+        df["name"].str.contains(card_dict["search_term"].replace("_", " "))
+    ]
 
     if filter_title:
-        df = df[df["title"].str.contains(card_dict["search_term"].replace("_", " "))]
+        df = df[
+            df["title"].str.contains(
+                card_dict["search_term"].replace("_", " ")
+            )
+        ]
 
     if card_dict["gb_required"] is not False:
         df = df[df["title"].str.contains(card_dict["gb_required"])]
@@ -113,7 +93,7 @@ def apply_dict_filters(df, card_dict, filter_title=True, clean_outliers=True):
         df = df[~df["title"].str.contains("Founders|founders")]
 
     if clean_outliers:
-        df = remove_outliers(df, "total price")
+        df = remove_outliers(df, "total_price")
 
     if len(df) == 0:
         raise Exception("No data left after filters")
@@ -124,7 +104,9 @@ for index, filters in enumerate(plots_dict):
     # index = 27
     # filters = plots_dict[index]
 
-    df_subset = apply_dict_filters(df, filters, filter_title=True, clean_outliers=True)
+    df_subset = apply_dict_filters(
+        df, filters, filter_title=True, clean_outliers=True
+    )
 
     # average across a number of days
     average_period = 14  # set the number of days to average by
@@ -134,7 +116,9 @@ for index, filters in enumerate(plots_dict):
         .astype(int)
     )
 
-    df_subset["day_group"] = ceil((df_subset["day_count"].values / average_period))
+    df_subset["day_group"] = ceil(
+        (df_subset["day_count"].values / average_period)
+    )
 
     df_subset["num_sold"] = 1
 
@@ -144,13 +128,15 @@ for index, filters in enumerate(plots_dict):
         "bids": "mean",
         "price": "mean",
         "postage": "mean",
-        "total price": "mean",
+        "total_price": "mean",
         "date_int": "max",
         "num_sold": "sum",
         "day_group": "mean",
     }
 
-    df_average = df_subset.groupby(["day_group"]).agg(agg_dict).reset_index(drop=True)
+    df_average = (
+        df_subset.groupby(["day_group"]).agg(agg_dict).reset_index(drop=True)
+    )
 
     df_average.rename(columns={"date_int": "date"}, inplace=True)
     df_average["date"] = pd.to_datetime(df_average["date"])
@@ -165,7 +151,7 @@ for index, filters in enumerate(plots_dict):
     ax.grid(color="gray", linestyle="dashed", which="both", alpha=0.5)
 
     x_axis = "date"
-    y_axis = "total price"
+    y_axis = "total_price"
     plt.xlabel(x_axis.title())
     plt.ylabel(y_axis.title())
     plt.title(f'{filters["title"]}', fontsize=14)
