@@ -98,7 +98,6 @@ def backup_database(database_filename):
     """
     Backup an existing database with a timestamp.
     """
-    logging.info(f"    Deleting database at: {database_filename}")
     if os.path.exists(database_filename):
         new_database_filename = f"{datetime.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}_{database_filename}"
         logging.info(f"    Backing up database to: {new_database_filename}")
