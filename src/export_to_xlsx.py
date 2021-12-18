@@ -3,6 +3,7 @@ Main script for running the scraper.
 """
 import pandas as pd
 from sqlalchemy import create_engine
+
 from configuration import DATABASE_NAME
 
 # SQLAlchemy connectable

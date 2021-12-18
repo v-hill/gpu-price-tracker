@@ -7,10 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from numpy import ceil
-import pandas as pd
 from sqlalchemy import create_engine
-from configuration import DATABASE_NAME
-from configuration import PATHS
+
+from configuration import DATABASE_NAME, PATHS
 
 # Load plotting spec file
 spec_filepath = "src/analysis/gpu_plots.json"
@@ -27,7 +26,7 @@ df_log = pd.read_sql_table("log", cnx)  # Log table
 df_gpu = pd.read_sql_table("gpu", cnx)  # GPU table
 df_sale = pd.read_sql_table("sale", cnx)  # Sale table
 
-df = df_sale.merge(df_gpu, on=['gpu_id'], how = 'left')
+df = df_sale.merge(df_gpu, on=["gpu_id"], how="left")
 
 
 # remove duplicate entries

@@ -44,7 +44,7 @@ The database is created in the root of the project directory.
 
 ### BROWSER (str)
 
-Then set the web broswer for Selenium to use. 
+Then set the web broswer for Selenium to use.
 Currently supports Firefox and Chrome.
 
 ```
@@ -71,4 +71,3 @@ The 'min' value specifies the lowest number of results to still be added to the 
 ```
 NUM_RESULTS = {"max": 5000, "min": 20}
 ```
-

@@ -1,5 +1,5 @@
 """
-Script for batch converting the legacy json "database" into the new sqlite 
+Script for batch converting the legacy json "database" into the new sqlite
 database format.
 """
 import os

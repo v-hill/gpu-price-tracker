@@ -85,7 +85,9 @@ def clean_dataframe(df):
 def apply_dict_filters(df, card_dict, filter_title=True):
     if filter_title:
         df = df[
-            df["Product title"].str.contains(card_dict["search_term"].replace("_", ""))
+            df["Product title"].str.contains(
+                card_dict["search_term"].replace("_", "")
+            )
         ]
 
     if card_dict["gb_required"] is not False:

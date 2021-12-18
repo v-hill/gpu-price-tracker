@@ -46,6 +46,7 @@ class WebPage:
     def close_webpage(self):
         self.driver.close()
 
+
 # -----------------------------------------------------------------------------
 
 
