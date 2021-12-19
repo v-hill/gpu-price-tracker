@@ -2,12 +2,13 @@
 Module for webpage related classes.
 """
 import logging
+import logging.config
 import re
 import time
 
 from bs4 import BeautifulSoup
 
-from scraper.product import EBayItem
+from scraper.src.product import EBayItem
 
 
 class WebPage:
@@ -33,7 +34,7 @@ class WebPage:
         """
         try:
             self.driver.get(self.start_url)
-            time.sleep(2)
+            time.sleep(3)
         except BaseException:
             raise Exception("Could not return to start url")
 
@@ -65,22 +66,32 @@ class MainWebPage(WebPage):
         """
         WebPage.__init__(self, driver, start_url)
         self.return_to_start_url()
-        time.sleep(2)
 
     def auto_accept_cookies(self):
         soup = self.page_source_soup()
+        # get button id
         try:
             accept_button_id = ""
             for button in soup.find_all("button"):
                 if "accept" in str(button.text).lower():
                     accept_button_id = button["id"]
+                    logging.info("    Accept cookies button found")
                     break
         except BaseException:
-            logging.info("Error: No cookies accept button found in page")
+            logging.exception("No cookies accept button found in page")
+
+        # click on button
         if accept_button_id != "":
-            gdpr_button = self.driver.find_element_by_id("gdpr-banner-accept")
-            gdpr_button.click()
-            time.sleep(2)
+            assert accept_button_id == "gdpr-banner-accept"
+            try:
+                gdpr_button = self.driver.find_element_by_id(accept_button_id)
+                gdpr_button.click()
+                logging.info("    Cookies successfully accepted")
+                time.sleep(2)
+            except:
+                logging.exception(
+                    "    Unable to click on accept cookies button"
+                )
 
     def open_model_menu(self):
         soup = self.page_source_soup()
@@ -93,7 +104,7 @@ class MainWebPage(WebPage):
                     button_css = f'[aria-controls="{aria_controls_text}"]'
                     break
         except BaseException:
-            raise Exception("No GPU model menu button found in page")
+            logging.exception("No GPU model menu button found in page")
         if button_css != "":
             menu_button = self.driver.find_element_by_css_selector(button_css)
             menu_button.click()
@@ -110,7 +121,7 @@ class MainWebPage(WebPage):
                         # print(button.prettify()) # For debug
                         button_css = f'[aria-label="{aria_label_text}"]'
         except BaseException:
-            raise Exception("Error: See all menu button not found")
+            logging.exception("See all menu button not found")
         if button_css != "":
             see_all_button = self.driver.find_element_by_css_selector(
                 button_css
@@ -118,7 +129,7 @@ class MainWebPage(WebPage):
             see_all_button.click()
             time.sleep(2)
         else:
-            raise Exception("Error: No see all menu button found in page")
+            logging.exception("No see all menu button found in page")
 
     def get_brand_menu_items(self):
         """
@@ -131,6 +142,12 @@ class MainWebPage(WebPage):
         options = menu.find_all(
             "label", {"class": "x-refine__multi-select-label"}
         )
+        if len(options) == 0:
+            logging.exception("No options found in Chipset/GPU model menu")
+        else:
+            logging.info(
+                f"    {len(options)} options found in Chipset/GPU model menu"
+            )
         return options
 
     def select_option(self, button_id: str):
@@ -190,43 +207,48 @@ class Pagination:
 
 
 class BrandWebPage(WebPage):
-    def __init__(self, driver, start_url: str, num_results_limits: dict):
+    def __init__(self, driver, start_url: str):
         WebPage.__init__(self, driver, start_url)
         self.pages = []
         self.current_page = None
         self.next_page = None
         self.num_results = 0
-        self.num_results_limits = num_results_limits
 
-    def get_number_of_results(self):
+    def check_number_of_results(self):
         """
-        Find the number of results on a page.
+        Find the number of results on a page. Raise an error if the number of
+        results is suspicously high, or if the number of results could not be
+        found.
 
         Raises
         ------
         Exception
             If the number of results is above the number of results maximum
-            (as set in the configuration.toml) then an exception is thrown.
-            This catches instances where the driver fails to navigate to the
-            correct GPU page.
-
-        Returns
-        -------
-        num_results : int
-            The number of results on the page.
+            then an exception is thrown. This catches instances where the
+            driver fails to navigate to the correct GPU page.
         """
+
+        max_results = 10000
         soup = self.page_source_soup()
         num_results = soup.find_all(
             "h2", {"class": "srp-controls__count-heading"}
         )
 
-        if num_results == 0:
-            raise Exception("Could not find number of results")
+        if len(num_results) == 0:
+            exception = "Could not find number of results"
+            logging.exception(exception)
+            raise Exception(exception)
 
         num_results_str = str(num_results[0].text).replace(",", "")
         num_results = int(re.findall(r"\d+", num_results_str)[0])
         logging.info(f"    {num_results} results found")
-        self.num_results = num_results
+        if num_results >= max_results:
+            exception = (
+                f"Number of results found ({num_results}) exceeds maximum"
+                f" allowed value of {max_results}"
+            )
+            logging.exception(exception)
+            raise Exception(exception)
         return num_results
 
     def get_pages(self):

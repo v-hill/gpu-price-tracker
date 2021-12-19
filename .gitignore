@@ -128,21 +128,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Database files
-.json
-
-# Plots
-.png
-
-# VS Code
-.vscode
-
-# Poetry lock files
-poetry.lock
-
-configuration.py
-configuration_local.py
+# Scratch files
 scratch*
 
+# Data files
+*.csv
 *.db
 *.xlsx
+*.log
+*.sqlite3

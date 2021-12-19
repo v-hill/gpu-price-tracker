@@ -1,0 +1,128 @@
+[
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 1,
+        "fields": {
+            "architecture": "Curie",
+            "series": "GeForce 6 series",
+            "year": 2004
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 2,
+        "fields": {
+            "architecture": "Curie",
+            "series": "GeForce 7 series",
+            "year": 2005
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 3,
+        "fields": {
+            "architecture": "Tesla",
+            "series": "GeForce 8 series",
+            "year": 2006
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 4,
+        "fields": {
+            "architecture": "Tesla",
+            "series": "GeForce 9 series",
+            "year": 2008
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 5,
+        "fields": {
+            "architecture": "Tesla",
+            "series": "GeForce 200 series",
+            "year": 2008
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 6,
+        "fields": {
+            "architecture": "Fermi",
+            "series": "GeForce 400 series",
+            "year": 2010
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 7,
+        "fields": {
+            "architecture": "Fermi",
+            "series": "GeForce 500 series",
+            "year": 2010
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 8,
+        "fields": {
+            "architecture": "Kepler",
+            "series": "GeForce 600 series",
+            "year": 2012
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 9,
+        "fields": {
+            "architecture": "Kepler",
+            "series": "GeForce 700 series",
+            "year": 2013
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 10,
+        "fields": {
+            "architecture": "Maxwell",
+            "series": "GeForce 900 series",
+            "year": 2014
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 11,
+        "fields": {
+            "architecture": "Pascal",
+            "series": "GeForce 10 series",
+            "year": 2016
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 12,
+        "fields": {
+            "architecture": "Turing",
+            "series": "GeForce 16 series",
+            "year": 2019
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 13,
+        "fields": {
+            "architecture": "Turing",
+            "series": "GeForce 20 series",
+            "year": 2019
+        }
+    },
+    {
+        "model": "visualisation.nvidiageneration",
+        "pk": 14,
+        "fields": {
+            "architecture": "Ampere",
+            "series": "GeForce 30 series",
+            "year": 2020
+        }
+    }
+]
