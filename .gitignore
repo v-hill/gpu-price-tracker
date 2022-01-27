@@ -137,3 +137,5 @@ scratch*
 *.xlsx
 *.log
 *.sqlite3
+visualisation.json
+launch.json

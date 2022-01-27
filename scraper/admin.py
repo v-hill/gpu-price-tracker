@@ -34,7 +34,8 @@ class LogAdmin(admin.ModelAdmin):
 class BrandMenuAdmin(admin.ModelAdmin):
     list_display = (
         "text",
-        "log",
+        "first_log",
+        "latest_log",
     )
     search_fields = ["text"]
     ordering = ["text"]

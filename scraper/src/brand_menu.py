@@ -14,16 +14,19 @@ def update_brand_menu_table(menu_items, log):
         menu_entry = BrandMenu.objects.filter(text__exact=text).first()
         if menu_entry is None:
             new_menu_entry = BrandMenu(
-                log=log,
+                first_log=log,
+                latest_log=log,
                 text=text,
                 button_id=entry.find("input")["id"],
             )
             new_menu_entries.append(new_menu_entry)
         else:
             if menu_entry.button_id != entry.find("input")["id"]:
-                menu_entry.log = log
                 menu_entry.button_id = entry.find("input")["id"]
-                menu_entry.save()
-                logging.info(f"    Button with text {text} updated button id")
+                logging.info(
+                    f"    Button with text '{text}' updated button id"
+                )
+            menu_entry.latest_log = log
+            menu_entry.save()
 
     BrandMenu.objects.bulk_create(new_menu_entries)

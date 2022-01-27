@@ -63,7 +63,7 @@ class Log(models.Model):
                 f"{most_recent_log.start_time.strftime('%Y/%m/%d %H:%M:%S')}"
             )
             logging.info(time_since_str)
-            if diff.seconds <= (60 * 60 * reset_hours):
+            if diff.total_seconds() <= (60 * 60 * reset_hours):
                 return most_recent_log
             else:
                 new_id = most_recent_log.id + 1
@@ -83,7 +83,12 @@ class Log(models.Model):
 
 
 class BrandMenu(models.Model):
-    log = models.ForeignKey(Log, on_delete=models.CASCADE)
+    first_log = models.ForeignKey(
+        Log, on_delete=models.CASCADE, related_name="first_log"
+    )
+    latest_log = models.ForeignKey(
+        Log, on_delete=models.CASCADE, related_name="latest_log"
+    )
     text = models.CharField(max_length=80)
     button_id = models.CharField(max_length=80)
 

@@ -23,18 +23,7 @@ class EBayItem:
             repr_string += f"{key:<12}: {val} \n"
         return repr_string
 
-    def clean_item(self):
-        self.get_details()
-        self.get_attribute_dict()
-        self.get_title()
-        self.parse_date()
-        self.sort_price_details()
-        self.get_total_cost()
-        for key, val in self.item_attributes.items():
-            logging.debug(f"{key:<12}: {val}")
-        logging.debug("-" * 60)
-
-    def get_kwargs(self):
+    def get_clean_item(self):
         """
         Create a dictionary representation of the EBayItem for saving to the
         Sale table of the SQL database.
@@ -44,8 +33,20 @@ class EBayItem:
         kwargs : dict
             Dictionary of EBayItem instance.
         """
-        kwargs = copy.deepcopy(self.item_attributes)
-        return kwargs
+        self.get_details()
+        self.get_attribute_dict()
+        self.get_title()
+        self.parse_date()
+        try:
+            self.sort_price_details()
+            self.get_total_cost()
+            for key, val in self.item_attributes.items():
+                logging.debug(f"{key:<12}: {val}")
+            logging.debug("-" * 60)
+            kwargs = copy.deepcopy(self.item_attributes)
+            return kwargs
+        except:
+            return {}
 
     def get_details(self):
         """
@@ -113,7 +114,7 @@ class EBayItem:
         date_time = self.soup_tag.find(
             "div", {"class": re.compile("s-item__title-tag")}
         )
-        date_time = date_time.text.replace("Sold  ", "")
+        date_time = date_time.text.lower().replace("sold", "").strip()
         date = pd.to_datetime(date_time)
         date += pd.to_timedelta(12, unit="h")
         date_datetime = date.to_pydatetime()
@@ -135,7 +136,8 @@ class EBayItem:
                 price_list = re.findall(r"\d*\.?\d+", test_val)
                 if len(price_list) != 1:
                     raise Exception(
-                        "price list contains more than one element"
+                        f"price list '{price_list}' contains more than one"
+                        " element"
                     )
                 price_num = round(float(price_list[0]), 2)
                 self.item_attributes[key] = price_num

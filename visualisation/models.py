@@ -20,6 +20,7 @@ class NvidiaGeneration(models.Model):
 
 class GraphicsCard(models.Model):
     model = models.CharField(max_length=80)  # GeForce RTX 3060
+    short_model = models.CharField(max_length=20)  # 3060
     architecture = models.ForeignKey(
         NvidiaGeneration, on_delete=models.CASCADE
     )
@@ -50,3 +51,18 @@ class GraphicsCardLink(models.Model):
 
     class Meta:
         unique_together = ("model", "ebay_gpu")
+
+    def __str__(self):
+        return f"{self.ebay_gpu.name} --> {self.model.model}"
+
+
+class Sale(models.Model):
+    gpu = models.ForeignKey(GraphicsCard, on_delete=models.CASCADE)
+    title = models.CharField(max_length=80)
+    date = models.DateTimeField()
+    total_price = models.FloatField()
+    outlier = models.BooleanField(default=False)
+    founders = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"£{self.total_price:7.2f} | {self.title}"

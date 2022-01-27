@@ -60,21 +60,31 @@ def reset_data_collected_flag(reset_hours, log):
     for gpu_entry in EbayGraphicsCard.objects.all():
         if gpu_entry.collect_data:
             diff = current_datetime - gpu_entry.last_collection
-            if diff.seconds >= (60 * 60 * reset_hours):
+            if diff.total_seconds() >= (60 * 60 * reset_hours):
                 gpu_entry.data_collected = False
                 gpu_entry.log = log
                 gpu_entry.save()
 
 
-def data_left_to_collect():
+def gpu_with_data_left_to_collect(log):
     # find any gpu in the current log which does not have data_collected
-    gpu = EbayGraphicsCard.objects.filter(
-        data_collected=False, collect_data=True
-    ).first()
-    if gpu is None:
-        logging.info("No GPUs in current log without data collected")
-        return False
-    return True
+    available_menu_options = [
+        val["text"]
+        for val in list(
+            BrandMenu.objects.filter(latest_log=log).values("text")
+        )
+    ]
+    # check that gpu text is in brand menu latest logs
+    gpu = (
+        EbayGraphicsCard.objects.filter(
+            data_collected=False,
+            collect_data=True,
+            name__in=available_menu_options,
+        )
+        .order_by("-total_collected")
+        .first()
+    )
+    return gpu
 
 
 def navigate_to_gpu_page(webpage, gpu_button_id):
@@ -127,10 +137,11 @@ def bulk_insertion(log, gpu, item_tags):
     new_sale_items = []
     for tag in item_tags:
         new_item = EBayItem(tag)
-        new_item.clean_item()
-        item_kwargs = new_item.get_kwargs()
-        item_kwargs["date"] = make_aware(item_kwargs["date"])
+        item_kwargs = new_item.get_clean_item()
+        if not item_kwargs:
+            continue
 
+        item_kwargs["date"] = make_aware(item_kwargs["date"])
         new_sale = Sale.objects.filter(**item_kwargs).first()
 
         if new_sale is None:
@@ -151,8 +162,9 @@ def individual_insertion(log, gpu, item_tags):
     num_added_to_db = 0
     for tag in item_tags:
         new_item = EBayItem(tag)
-        new_item.clean_item()
-        item_kwargs = new_item.get_kwargs()
+        item_kwargs = new_item.get_clean_item()
+        if not item_kwargs:
+            continue
         item_kwargs["date"] = make_aware(item_kwargs["date"])
 
         new_sale = Sale.objects.filter(**item_kwargs).first()
@@ -206,12 +218,11 @@ def collect_data(log, gpu, brand_webpage):
 
 
 def process_gpu(log, webpage, main_webdriver, start_url):
-    if not data_left_to_collect():
+    gpu = gpu_with_data_left_to_collect(log)
+    if gpu is None:
+        logging.info("No GPUs in current log without data collected")
         return True
 
-    gpu = EbayGraphicsCard.objects.filter(
-        data_collected=False, collect_data=True
-    ).first()
     logging.info(f"Collecting data for {gpu.name}")
 
     gpu_button_id = BrandMenu.short_id_from_name(gpu.name)
