@@ -21,7 +21,7 @@ class LogAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "start_time",
-        "end_time",
+        # "end_time",
         "run_time",
         "sales_scraped",
         "sales_added",
