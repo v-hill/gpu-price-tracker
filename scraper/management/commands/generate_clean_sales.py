@@ -15,7 +15,7 @@ class Command(BaseCommand):
         "the GraphicsCardLink table definitions."
     )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **kwargs):
         Sale.objects.all().delete()
         exclusions_list = [
             "bitcoin",

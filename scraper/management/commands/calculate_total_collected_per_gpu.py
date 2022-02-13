@@ -12,7 +12,7 @@ class Command(BaseCommand):
         " EbayGraphicsCard table."
     )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **kwargs):
         self.stdout.write(
             "Calculating total_collected value for each GPU in the"
             " EbayGraphicsCard table..."

@@ -14,7 +14,7 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     help = "Make a backup of the sqlite3 database."
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **kwargs):
         database_path = settings.DATABASES["default"]["NAME"]
         if os.path.exists(database_path):
             old_name = database_path.stem
