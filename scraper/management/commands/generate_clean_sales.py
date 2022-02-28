@@ -7,6 +7,7 @@ from django.db.models import Q
 from scraper.models import EbayGraphicsCard
 from scraper.models import Sale as OriginalSale
 from visualisation.models import GraphicsCard, GraphicsCardLink, Sale
+import pandas as pd
 
 
 class Command(BaseCommand):
@@ -19,13 +20,16 @@ class Command(BaseCommand):
         Sale.objects.all().delete()
         exclusions_list = [
             "bitcoin",
+            "mining",
             "box only",
             "damaged",
             "fake",
             "faulty",
-            "intelnew",
+            "intel",
             "parts only",
             "repair",
+            "needs",
+            "but",
             "ryzen",
         ]
         general_exclusions = Q()
@@ -78,12 +82,50 @@ class Command(BaseCommand):
             filtered_qs = filtered_qs.exclude(general_exclusions)
 
             filtered_qs = filtered_qs.exclude(title__iregex=r"^.{,7}$")
+            if filtered_qs.count() == 0:
+                continue
 
-            # for item in filtered_qs.values().order_by("-total_price")[:5]:
-            #     print(f"    £{item['total_price']:>5} | {item['title']}")
+            df = pd.DataFrame(
+                filtered_qs.values("date", "title", "total_price")
+            )
+            df["date"] = pd.to_datetime(df["date"])
+            df = df.sort_values(by="date").reset_index()
+            df_rolling = self.get_rolling_prices(df)
 
+            df = pd.merge(df, df_rolling, on="date", how="left")
+
+            # set flag for upper outliers
+            df.loc[
+                (
+                    df["total_price"]
+                    > df["rolling price mean"]
+                    + (df["rolling price stdev"]) * 2
+                )
+                & (df["rolling price stdev"] > 0),
+                "outlier",
+            ] = 1
+
+            # set flag for lower outliers
+            df.loc[
+                (
+                    df["total_price"]
+                    < df["rolling price mean"]
+                    - (df["rolling price stdev"]) * 2
+                )
+                & (df["rolling price stdev"] > 0),
+                "outlier",
+            ] = 1
+
+            df["outlier"] = df["outlier"].fillna(value=0)
+
+            num_outliers = int(df["outlier"].sum())
+            self.stdout.write(
+                f"    {num_outliers} / {df.shape[0]} outliers removed -"
+                f" {num_outliers/df.shape[0]:0.1%}"
+            )
+            df = df[df["outlier"] == 0]
             new_sales = []
-            for item in filtered_qs.values():
+            for index, item in df.iterrows():
                 if "founder" in item["title"].lower():
                     new_sale = Sale(
                         gpu=card,
@@ -106,7 +148,32 @@ class Command(BaseCommand):
             Sale.objects.bulk_create(new_sales)
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"    {filtered_qs.count()} / {sales_qs.count()} sales"
-                    " added"
+                    f"    {len(new_sales)} / {sales_qs.count()} sales added"
                 )
             )
+
+    def get_rolling_prices(self, df):
+        df_date_grouped = (
+            df.groupby("date")["total_price"].mean().reset_index()
+        )
+        df_date_grouped.set_index("date", inplace=True)
+        rolling_stdev = df_date_grouped.rolling(14, min_periods=7).std()
+        rolling_stdev["date"] = rolling_stdev.index
+        rolling_stdev.rename(
+            columns={"total_price": "rolling price stdev"}, inplace=True
+        )
+        rolling_stdev = rolling_stdev.reset_index(drop=True)
+
+        rolling_mean = df_date_grouped.rolling(7, min_periods=1).mean()
+        rolling_mean["date"] = rolling_mean.index
+        rolling_mean.rename(
+            columns={"total_price": "rolling price mean"}, inplace=True
+        )
+        rolling_mean = rolling_mean.reset_index(drop=True)
+
+        df_rolling = pd.merge(
+            rolling_mean, rolling_stdev, on="date", how="outer"
+        )
+
+        df_rolling = df_rolling.fillna(value=0)
+        return df_rolling
