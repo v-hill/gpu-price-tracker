@@ -9,6 +9,9 @@
             <li class="nav-item {% ifequal nmenu 'total_sales' %} active {% endifequal %}">
                 <a class="nav-link" href="{% url 'total_sales' %}">Total Sales</a>
             </li>
+            <li class="nav-item {% ifequal nmenu 'total_sales_filtered' %} active {% endifequal %}">
+                <a class="nav-link" href="{% url 'total_sales_filtered' %}">Total Sales Filtered</a>
+            </li>
             <li class="nav-item {% ifequal nmenu 'individual_scatter' %} active {% endifequal %}">
                 <a class="nav-link" href="{% url 'individual_scatter' %}">Scatter plots</a>
             </li>

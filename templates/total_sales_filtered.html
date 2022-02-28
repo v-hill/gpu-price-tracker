@@ -1,0 +1,67 @@
+{% extends 'partials/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% load crispy_forms_tags %}
+
+<!-- style="border:1px solid #414141;" -->
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col">
+        </div>
+        <div class="col-10">
+            <canvas id="myChart" width="300" height="150"></canvas>
+            <script>
+                Chart.defaults.font.size = 15;
+                const ctx = document.getElementById('myChart').getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [{% for d in data %} '{{ d.gpu__model }}', {% endfor %}],
+                datasets: [{
+                    data: [{% for d in data %} {{ d.total_collected }}, {% endfor %}],
+                    backgroundColor: [
+                        'rgba(127, 188, 2, 0.75)',
+                    ],
+                        borderColor: [
+                            'rgba(127, 188, 2, 1)',
+                        ],
+                            borderWidth: 5
+                            }]
+                        },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                                text: 'Total Sales per Graphics Card model',
+                                    padding: {
+                                top: 0,
+                                    bottom: 25
+
+                            },
+                            font: {
+                                size: 20
+                            }
+                        },
+                        legend: {
+                            display: false,
+                            }
+
+                    }
+                }
+                    });
+            </script>
+        </div>
+        <div class="col">
+        </div>
+    </div>
+
+
+
+</div>
+{% endblock %}

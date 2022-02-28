@@ -3,6 +3,7 @@ import json
 
 import pytz
 from django.shortcuts import render
+from django.db.models import Count
 
 from scraper.models import EbayGraphicsCard
 from visualisation.models import GraphicsCard, Sale
@@ -25,6 +26,20 @@ def total_sales(request):
         "nmenu": "total_sales",
     }
     return render(request, "total_sales.html", context)
+
+
+def total_sales_filtered(request):
+    data = (
+        Sale.objects.values("gpu__model")
+        .annotate(total_collected=Count("gpu"))
+        .order_by("-total_collected")[:20]
+    )
+
+    context = {
+        "data": data,
+        "nmenu": "total_sales",
+    }
+    return render(request, "total_sales_filtered.html", context)
 
 
 def individual_scatter(request):
