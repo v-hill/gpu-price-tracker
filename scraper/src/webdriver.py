@@ -3,6 +3,7 @@ Setup for selenium webdriver.
 """
 import logging
 import logging.config
+import time 
 
 import selenium.webdriver.chrome.options as chrome
 import selenium.webdriver.firefox.options as firefox
@@ -37,4 +38,5 @@ def get_main_webdriver(browser, paths):
         main_webdriver = webdriver.Firefox(
             executable_path=paths["geckodriver"], options=browser_options
         )
+        time.sleep(5)
     return main_webdriver

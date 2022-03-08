@@ -99,7 +99,7 @@ class Command(BaseCommand):
                 (
                     df["total_price"]
                     > df["rolling price mean"]
-                    + (df["rolling price stdev"]) * 2
+                    + (df["rolling price stdev"]) * 2.5
                 )
                 & (df["rolling price stdev"] > 0),
                 "outlier",
@@ -110,7 +110,7 @@ class Command(BaseCommand):
                 (
                     df["total_price"]
                     < df["rolling price mean"]
-                    - (df["rolling price stdev"]) * 2
+                    - (df["rolling price stdev"]) * 2.5
                 )
                 & (df["rolling price stdev"] > 0),
                 "outlier",

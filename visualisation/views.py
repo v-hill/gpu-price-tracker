@@ -37,7 +37,7 @@ def total_sales_filtered(request):
 
     context = {
         "data": data,
-        "nmenu": "total_sales",
+        "nmenu": "total_sales_filtered",
     }
     return render(request, "total_sales_filtered.html", context)
 
@@ -54,7 +54,9 @@ def individual_scatter(request):
         gpu = GraphicsCard.objects.all().first()
         search_term = "Select a model"
 
-    data = Sale.objects.filter(gpu__id=gpu.id)
+    data = Sale.objects.filter(
+        gpu__id=gpu.id, date__gte=datetime.date(2021, 1, 1)
+    )
     data = list(data.values_list("date", "total_price"))
     plot_data = [
         {"x": unix_time_millis(point[0]), "y": point[1]} for point in data
