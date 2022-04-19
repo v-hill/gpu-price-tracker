@@ -140,7 +140,7 @@ class MainWebPage(WebPage):
             "div", {"class": "x-overlay__wrapper--right"}
         )
         options = menu.find_all(
-            "label", {"class": "x-refine__multi-select-label"}
+            "div", {"class": "x-refine__multi-select x-overlay-sub-panel__aspect-option"}
         )
         if len(options) == 0:
             logging.exception("No options found in Chipset/GPU model menu")
