@@ -3,7 +3,7 @@ Setup for selenium webdriver.
 """
 import logging
 import logging.config
-import time 
+import time
 
 import selenium.webdriver.chrome.options as chrome
 import selenium.webdriver.firefox.options as firefox

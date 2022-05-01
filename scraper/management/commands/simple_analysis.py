@@ -1,14 +1,13 @@
 """
 Run this script using `python manage.py simple_analysis`
 """
+import pandas as pd
 from django.core.management.base import BaseCommand
-from django.db.models import Q
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from scraper.models import EbayGraphicsCard
 from scraper.models import Sale as OriginalSale
 from visualisation.models import GraphicsCard, GraphicsCardLink, Sale
-import pandas as pd
 
 
 class Command(BaseCommand):

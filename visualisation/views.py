@@ -2,8 +2,8 @@ import datetime
 import json
 
 import pytz
-from django.shortcuts import render
 from django.db.models import Count
+from django.shortcuts import render
 
 from scraper.models import EbayGraphicsCard
 from visualisation.models import GraphicsCard, Sale

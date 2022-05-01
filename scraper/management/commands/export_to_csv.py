@@ -1,9 +1,11 @@
 """
 Run this script using `python manage.py export_to_csv`
 """
-from django.core.management.base import BaseCommand
-from visualisation.models import GraphicsCard, Sale
 import csv
+
+from django.core.management.base import BaseCommand
+
+from visualisation.models import GraphicsCard, Sale
 
 
 class Command(BaseCommand):
