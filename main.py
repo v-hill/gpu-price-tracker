@@ -42,7 +42,15 @@ PATHS = {
     "geckodriver": "U:/Work/Programming/WebDrivers/geckodriver.exe",
 }
 
-START_URL = "https://www.ebay.co.uk/b/Computer-Graphics-Video-Cards/27386/bn_661667?LH_ItemCondition=3000&LH_PrefLoc=1&LH_Sold=1&rt=nc&_sop=13&_udlo=10"
+START_URL = (
+    "https://www.ebay.co.uk/b/Computer-Graphics-Video-Cards"
+    "/27386/bn_661667?LH_ItemCondition=3000"
+    "&LH_PrefLoc=1"
+    "&LH_Sold=1"
+    "&rt=nc"
+    "&_sop=13"
+    "&_udlo=10"
+)
 
 DATA_READ_RESET_HOURS = 6
 

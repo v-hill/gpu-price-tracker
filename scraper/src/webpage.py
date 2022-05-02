@@ -33,7 +33,7 @@ class WebPage:
             raise Exception("Could not return to start url")
 
     def page_source_soup(self):
-        """Return a BeautifulSoup soup representation of the current webpage."""
+        """Return a BeautifulSoup soup representation of the current page."""
         return BeautifulSoup(self.driver.page_source, "html.parser")
 
     def close_webpage(self):
@@ -75,7 +75,11 @@ class MainWebPage(WebPage):
 
         # click on button
         if accept_button_id != "":
-            assert accept_button_id == "gdpr-banner-accept"
+            assert accept_button_id == "gdpr-banner-accept", (
+                "Cookies 'accept' button does not have the correct"
+                " id.\nExpected: 'gdpr-banner-accept' but found:"
+                f" {accept_button_id}."
+            )
             try:
                 gdpr_button = self.driver.find_element_by_id(accept_button_id)
                 gdpr_button.click()

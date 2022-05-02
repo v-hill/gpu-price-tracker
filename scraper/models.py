@@ -103,8 +103,9 @@ class BrandMenu(models.Model):
         return self.text
 
     def short_id(self):
+        """Remove the prefix from the button ID."""
         short_id = self.button_id.replace("c4-subPanel-Chipset%", "")
-        assert short_id != self.button_id
+        assert short_id != self.button_id, "Length of button ID is unchanged"
         return short_id
 
     @classmethod

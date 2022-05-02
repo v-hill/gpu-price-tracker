@@ -12,12 +12,14 @@ DRIVER_OPTIONS = {"disable_gpu": True}
 
 def get_driver_options(browser):
     logging.info(f"    {browser.capitalize()} browser selected")
+    if browser not in ["chrome", "firefox"]:
+        raise Exception(f"Browser {browser} is not 'chrome' or 'firefox'")
+
     if browser == "chrome":
         browser_options = chrome.Options()
-    if browser == "firefox":
+    elif browser == "firefox":
         browser_options = firefox.Options()
-    else:
-        raise Exception(f"Browser {browser} is not 'chrome' or 'firefox'")
+
     browser_options.add_argument(
         "--disable-blink-features=AutomationControlled"
     )

@@ -46,7 +46,7 @@ class Command(BaseCommand):
             df = df.sort_values(by="date").reset_index()
             df_rolling = self.get_rolling_prices(df)
 
-            df = pd.merge(df, df_rolling, on="date", how="left")
+            df = df.merge(df_rolling, on="date", how="left")
 
             df = self.remove_outliers(df)
             new_sales = self.create_sale_objects(card, df)
@@ -173,24 +173,21 @@ class Command(BaseCommand):
         df_date_grouped = (
             df.groupby("date")["total_price"].mean().reset_index()
         )
-        df_date_grouped.set_index("date", inplace=True)
+        df_date_grouped = df_date_grouped.set_index("date")
         rolling_stdev = df_date_grouped.rolling(14, min_periods=7).std()
         rolling_stdev["date"] = rolling_stdev.index
-        rolling_stdev.rename(
-            columns={"total_price": "rolling price stdev"}, inplace=True
+        rolling_stdev = rolling_stdev.rename(
+            columns={"total_price": "rolling price stdev"}
         )
         rolling_stdev = rolling_stdev.reset_index(drop=True)
 
         rolling_mean = df_date_grouped.rolling(7, min_periods=1).mean()
         rolling_mean["date"] = rolling_mean.index
-        rolling_mean.rename(
-            columns={"total_price": "rolling price mean"}, inplace=True
+        rolling_mean = rolling_mean.rename(
+            columns={"total_price": "rolling price mean"}
         )
         rolling_mean = rolling_mean.reset_index(drop=True)
 
-        df_rolling = pd.merge(
-            rolling_mean, rolling_stdev, on="date", how="outer"
-        )
-
+        df_rolling = rolling_mean.merge(rolling_stdev, on="date", how="outer")
         df_rolling = df_rolling.fillna(value=0)
         return df_rolling

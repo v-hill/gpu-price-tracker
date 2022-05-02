@@ -18,7 +18,8 @@ def backup_database(database_path):
     """Backup an existing database with a timestamp."""
     if os.path.exists(database_path):
         old_name = database_path.stem
-        new_name = f"{datetime.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}_{old_name}{database_path.suffix}"
+        current_time = datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
+        new_name = f"{current_time}_{old_name}{database_path.suffix}"
         new_database_path = database_path.parent / new_name
         logging.info(f"    Backing up database to: {new_database_path}")
         shutil.copy(database_path, new_database_path)
@@ -225,7 +226,8 @@ def process_gpu(log, webpage, main_webdriver, start_url):
     navigate_to_gpu_page(webpage, gpu_button_id)
     create_url_obj(webpage.driver.current_url, log, gpu)
 
-    # Now the we're on the page for a particular gpu, create a BrandWebPage instance
+    # Now the we're on the page for a particular gpu, create an instance of
+    # the BrandWebPage class
     brand_webpage = BrandWebPage(main_webdriver, start_url)
     brand_webpage.check_number_of_results()
 
