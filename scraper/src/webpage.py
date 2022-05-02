@@ -159,8 +159,8 @@ class MainWebPage(WebPage):
         product : GraphicsCard
             The product to select
         """
-        START_TIME = time.time()
-        while (time.time() - START_TIME) <= 10:
+        start_time = time.time()
+        while (time.time() - start_time) <= 10:
             try:
                 option_button = self.driver.find_element_by_css_selector(
                     f'[id*="{button_id}"]'

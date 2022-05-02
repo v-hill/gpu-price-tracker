@@ -5,8 +5,8 @@ def django_setup():
     import os
     from pathlib import Path
 
-    BASE_DIR = Path(__file__).resolve().parent
-    os.chdir(BASE_DIR)
+    base_directory = Path(__file__).resolve().parent
+    os.chdir(base_directory)
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "website.settings")
 
     import django
