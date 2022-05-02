@@ -55,16 +55,9 @@ class Log(models.Model):
         current_datetime = make_aware(datetime.datetime.now())
 
         if most_recent_log is not None:
-            diff = current_datetime - most_recent_log.start_time
-            days, hours, minutes, seconds = convert_timedelta(diff)
-            time_since_str = generate_time_since_str(
-                days, hours, minutes, seconds
+            diff = cls.find_time_since_last_log(
+                most_recent_log, current_datetime
             )
-            logging.info(
-                "Previous Log entry: "
-                f"{most_recent_log.start_time.strftime('%Y/%m/%d %H:%M:%S')}"
-            )
-            logging.info(time_since_str)
             if diff.total_seconds() <= (60 * 60 * reset_hours):
                 return most_recent_log
             else:
@@ -82,6 +75,18 @@ class Log(models.Model):
         )
         new_log.save()
         return new_log
+
+    @classmethod
+    def find_time_since_last_log(cls, most_recent_log, current_datetime):
+        diff = current_datetime - most_recent_log.start_time
+        days, hours, minutes, seconds = convert_timedelta(diff)
+        time_since_str = generate_time_since_str(days, hours, minutes, seconds)
+        logging.info(
+            "Previous Log entry: "
+            f"{most_recent_log.start_time.strftime('%Y/%m/%d %H:%M:%S')}"
+        )
+        logging.info(time_since_str)
+        return diff
 
 
 class BrandMenu(models.Model):
