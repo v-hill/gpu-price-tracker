@@ -1,7 +1,4 @@
-"""
-Main script for running the scraper.
-"""
-
+"""Main script for running the scraper."""
 
 import datetime
 import logging
@@ -18,9 +15,7 @@ from scraper.src.webpage import BrandWebPage
 
 
 def backup_database(database_path):
-    """
-    Backup an existing database with a timestamp.
-    """
+    """Backup an existing database with a timestamp."""
     if os.path.exists(database_path):
         old_name = database_path.stem
         new_name = f"{datetime.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}_{old_name}{database_path.suffix}"

@@ -1,6 +1,4 @@
-"""
-Logging setup.
-"""
+"""Logging setup."""
 import logging
 import logging.config
 import sys

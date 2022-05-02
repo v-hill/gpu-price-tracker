@@ -1,6 +1,4 @@
-"""
-Module for webpage related classes.
-"""
+"""Module for webpage related classes."""
 import logging
 import logging.config
 import re
@@ -12,26 +10,22 @@ from scraper.src.product import EBayItem
 
 
 class WebPage:
-    """
-    This class serves as a general containiner for an EBay webpage.
+    """Base representation of an EBay webpage.
+
+    Parameters
+    ----------
+    driver : webdriver.Webdriver
+        Seleniumwebdriver used to communicate with the browser window.
+    start_url : str
+        The URL of the webpage
     """
 
     def __init__(self, driver, start_url: str):
-        """
-        Parameters
-        ----------
-        driver : webdriver.Webdriver
-            Seleniumwebdriver used to communicate with the browser window.
-        start_url : str
-            The URL of the webpage
-        """
         self.driver = driver
         self.start_url = start_url
 
     def return_to_start_url(self):
-        """
-        Function to return to the starting URL of the webpage.
-        """
+        """Return the browser to the starting URL of the webpage."""
         try:
             self.driver.get(self.start_url)
             time.sleep(3)
@@ -39,9 +33,7 @@ class WebPage:
             raise Exception("Could not return to start url")
 
     def page_source_soup(self):
-        """
-        Return a BeautifulSoup soup representation of the current webpage.
-        """
+        """Return a BeautifulSoup soup representation of the current webpage."""
         return BeautifulSoup(self.driver.page_source, "html.parser")
 
     def close_webpage(self):
@@ -53,7 +45,8 @@ class WebPage:
 
 class MainWebPage(WebPage):
     def __init__(self, driver, start_url: str):
-        """
+        """Class to represent the webpage that is initially opened.
+
         Inhertied from base WebPage class. Represents the first page opened,
         with functions for accepting cookies, opening menus and selecting a
         particular product.
@@ -132,7 +125,8 @@ class MainWebPage(WebPage):
             logging.exception("No see all menu button found in page")
 
     def get_brand_menu_items(self):
-        """
+        """Get the available GPU products in te brand menu.
+
         Given the Chipset/GPU Model menu, create a list of entries for the gpu
         table for the set of available products in the menu.
         """
@@ -140,7 +134,12 @@ class MainWebPage(WebPage):
             "div", {"class": "x-overlay__wrapper--right"}
         )
         options = menu.find_all(
-            "div", {"class": "x-refine__multi-select x-overlay-sub-panel__aspect-option"}
+            "div",
+            {
+                "class": (
+                    "x-refine__multi-select x-overlay-sub-panel__aspect-option"
+                )
+            },
         )
         if len(options) == 0:
             logging.exception("No options found in Chipset/GPU model menu")
@@ -151,8 +150,8 @@ class MainWebPage(WebPage):
         return options
 
     def select_option(self, button_id: str):
-        """
-        Select an option from the menu given a GraphicsCard object.
+        """Select an option from the menu given a GraphicsCard object.
+
         Keeps trying to select option until successful for 10 seconds.
 
         Parameters
@@ -175,7 +174,8 @@ class MainWebPage(WebPage):
             raise Exception("Unable to select option from the brands menu")
 
     def apply_selection(self):
-        """
+        """Press the apply button.
+
         Press the apply button to navigate to the page with the applied
         filters.
         """
@@ -189,9 +189,7 @@ class MainWebPage(WebPage):
 
 
 class Pagination:
-    """
-    Class for representing an a page option in the pagination bar.
-    """
+    """Class for representing an a page option in the pagination bar."""
 
     def __init__(self, page_num: int, label: str, href: str):
         self.page_num = page_num
@@ -215,10 +213,10 @@ class BrandWebPage(WebPage):
         self.num_results = 0
 
     def check_number_of_results(self):
-        """
-        Find the number of results on a page. Raise an error if the number of
-        results is suspicously high, or if the number of results could not be
-        found.
+        """Find the number of results on a page.
+
+        Raise an error if the number of results is suspicously high, or if the
+        number of results could not be found.
 
         Raises
         ------
@@ -227,7 +225,6 @@ class BrandWebPage(WebPage):
             then an exception is thrown. This catches instances where the
             driver fails to navigate to the correct GPU page.
         """
-
         max_results = 10000
         soup = self.page_source_soup()
         num_results = soup.find_all(
@@ -252,9 +249,7 @@ class BrandWebPage(WebPage):
         return num_results
 
     def get_pages(self):
-        """
-        Populate list of Pagination objects.
-        """
+        """Populate list of Pagination objects."""
         soup = self.page_source_soup()
         self.pages = []
         pagination = soup.find("div", {"class": "b-pagination"})

@@ -1,45 +1,9 @@
-"""
-Module for miscellaneous utilities.
-"""
+"""Module for miscellaneous utilities."""
 import re
 
 
-def check_always_accepted(name: str, filters: dict):
-    """
-    Check if the GPU name contains one the always_accept filters set in the
-    configuration.
-
-    Parameters
-    ----------
-    name : str
-        GPU name
-    filters : dict
-        Dict containing accepted_substrings strings and always_accept strings
-
-    Returns
-    -------
-    bool
-        True if GPU contains an always accepted string, else False.
-    """
-    filters = [f.lower() for f in filters["always_accept"]]
-    if any(x in name.lower() for x in filters):
-        return True
-    return False
-
-
-def check_num_results_bounds(num_results: int, num_results_limits: dict):
-    if num_results <= num_results_limits["min"]:
-        return False
-    if num_results >= num_results_limits["max"]:
-        raise Exception(
-            "Too many results found, navigation to GPU page unsuccessful"
-        )
-    return True
-
-
 def remove_unicode(input_string: str):
-    """
-    Function that takes in a string and removes any unicode characters.
+    """Remove any unicode characters from a string.
 
     Parameters
     ----------

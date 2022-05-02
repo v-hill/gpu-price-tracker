@@ -1,3 +1,4 @@
+"""Django admin customisation for the visualisation app models."""
 from django.contrib import admin
 
 from .models import GraphicsCard, GraphicsCardLink, NvidiaGeneration, Sale

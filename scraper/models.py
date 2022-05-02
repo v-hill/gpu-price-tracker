@@ -1,3 +1,4 @@
+"""Database model definitions for the scraper data storage."""
 import datetime
 import logging
 import logging.config
@@ -42,13 +43,14 @@ class Log(models.Model):
 
     @classmethod
     def get_new_log(cls, reset_hours):
-        """
-        Get the most recent log from the Log table.
-        Print the start_time of previous log and time since last run.
-        If no prevous log, print no previous runs.
-        Create new log to use for this run of the scraper.
-        """
+        """Get or create a new runtime log.
 
+        Steps:
+         - Get the most recent log from the Log table.
+         - Print the start_time of previous log and time since last run.
+         - If no prevous log, print no previous runs.
+         - Create new log to use for this run of the scraper.
+        """
         most_recent_log = cls.objects.all().order_by("-start_time").first()
         current_datetime = make_aware(datetime.datetime.now())
 
@@ -106,6 +108,8 @@ class BrandMenu(models.Model):
         return button.short_id()
 
     class Meta:
+        """Metadata options."""
+
         unique_together = ("text",)
 
 
@@ -118,6 +122,8 @@ class EbayGraphicsCard(models.Model):
     total_collected = models.IntegerField(blank=True, null=True)
 
     class Meta:
+        """Metadata options."""
+
         unique_together = ("name",)
 
     def __str__(self) -> str:
@@ -130,6 +136,8 @@ class URL(models.Model):
     gpu = models.ForeignKey(EbayGraphicsCard, on_delete=models.CASCADE)
 
     class Meta:
+        """Metadata options."""
+
         unique_together = (
             "url",
             "log",
@@ -148,6 +156,8 @@ class Sale(models.Model):
     total_price = models.FloatField()
 
     class Meta:
+        """Metadata options."""
+
         unique_together = (
             "gpu",
             "title",

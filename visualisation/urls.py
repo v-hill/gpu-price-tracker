@@ -1,3 +1,4 @@
+"""Django URLs for the front-end."""
 from django.urls import path
 
 from . import views

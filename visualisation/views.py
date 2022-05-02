@@ -1,3 +1,4 @@
+"""Django views for the front-end."""
 import datetime
 import json
 
@@ -61,7 +62,7 @@ def individual_scatter(request):
     plot_data = [
         {"x": unix_time_millis(point[0]), "y": point[1]} for point in data
     ]
-    max_price = max([point[1] for point in data])
+    max_price = max(point[1] for point in data)
 
     context = {
         "plot_data": json.dumps(plot_data),

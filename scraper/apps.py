@@ -1,3 +1,4 @@
+"""Explicitly defined the primary key type."""
 from django.apps import AppConfig
 
 

@@ -1,4 +1,5 @@
-"""
+"""Export the data for a specified GPU to a csv file.
+
 Run this script using `python manage.py export_to_csv`
 """
 import csv

@@ -1,6 +1,4 @@
-"""
-Module for EBayItem class.
-"""
+"""Module for EBayItem class."""
 import copy
 import logging
 import re
@@ -24,9 +22,9 @@ class EBayItem:
         return repr_string
 
     def get_clean_item(self):
-        """
-        Create a dictionary representation of the EBayItem for saving to the
-        Sale table of the SQL database.
+        """Create a dictionary representation of the EBayItem.
+
+        Clean the item attributes for saving to the table of the SQL database.
 
         Returns
         -------
@@ -49,9 +47,7 @@ class EBayItem:
             return {}
 
     def get_details(self):
-        """
-        Populate the self.item_details with a dictionay of atrributes.
-        """
+        """Populate the self.item_details with a dictionay of atrributes."""
         detail_class_str = "^s-item__detail s-item__detail"
         self.item_details = self.soup_tag.find_all(
             "div", {"class": re.compile(detail_class_str)}
@@ -63,7 +59,8 @@ class EBayItem:
         )
 
     def get_attribute_dict(self):
-        """
+        """Populate the self.item_attributes dictionary.
+
         Populate the self.item_attributes dictionary with the following
         attributes:
           - price
@@ -88,7 +85,8 @@ class EBayItem:
             self.item_attributes["postage"] = 0
 
     def get_title(self):
-        """
+        """Populate the self.item_attributes dictionary.
+
         Populate the self.item_attributes dictionary with the following
         attributes:
           - title
@@ -106,7 +104,8 @@ class EBayItem:
             self.item_attributes["title"] = None
 
     def parse_date(self):
-        """
+        """Get a pandas datetime for the sold date.
+
         Populate the self.item_attributes dictionary with the following
         attributes:
           - date
@@ -121,9 +120,7 @@ class EBayItem:
         self.item_attributes["date"] = date_datetime
 
     def sort_price_details(self):
-        """
-        Converts price and postage info into floating point values.
-        """
+        """Convert price and postage info into floating point values."""
         attr_dict = copy.deepcopy(self.item_attributes)
         for key in ["price", "postage"]:
             test_val = str(attr_dict[key]).replace(",", "")

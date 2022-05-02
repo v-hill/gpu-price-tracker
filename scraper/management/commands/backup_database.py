@@ -1,5 +1,5 @@
-"""
-Backup an existing database with a timestamp.
+"""Backup an existing database with a timestamp.
+
 Run this script using `python manage.py backup_database`
 """
 

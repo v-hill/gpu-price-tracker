@@ -1,4 +1,5 @@
-"""
+"""Calculates the number of sales collected for each GPU.
+
 Run this script using `python manage.py calculate_total_collected_per_gpu`
 """
 from django.core.management.base import BaseCommand

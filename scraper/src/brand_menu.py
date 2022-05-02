@@ -1,3 +1,8 @@
+"""Functions relaed to the eBay brand menu.
+
+The brand menu is the menu the opens up when the user clicks on the
+'Chipset/GPU Model' filter when searching for an item.
+"""
 import logging
 import logging.config
 

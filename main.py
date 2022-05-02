@@ -1,6 +1,4 @@
-"""
-Main script for running the scraper.
-"""
+"""Main script for running the scraper."""
 
 
 def django_setup():

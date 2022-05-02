@@ -1,3 +1,4 @@
+"""Database models for storing the cleaned data used in the front-end."""
 from django.db import models
 
 from scraper.models import EbayGraphicsCard
@@ -9,6 +10,8 @@ class NvidiaGeneration(models.Model):
     year = models.IntegerField(verbose_name="Release year")
 
     class Meta:
+        """Metadata options."""
+
         unique_together = (
             "architecture",
             "series",
@@ -42,6 +45,8 @@ class GraphicsCard(models.Model):
         return f"{self.model}"
 
     class Meta:
+        """Metadata options."""
+
         unique_together = ("model",)
 
 
@@ -50,6 +55,8 @@ class GraphicsCardLink(models.Model):
     ebay_gpu = models.ForeignKey(EbayGraphicsCard, on_delete=models.CASCADE)
 
     class Meta:
+        """Metadata options."""
+
         unique_together = ("model", "ebay_gpu")
 
     def __str__(self):

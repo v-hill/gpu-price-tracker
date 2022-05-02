@@ -1,4 +1,5 @@
-"""
+"""Populate the visualisation app Sale table with cleaned data.
+
 Run this script using `python manage.py generate_clean_sales`
 """
 import pandas as pd

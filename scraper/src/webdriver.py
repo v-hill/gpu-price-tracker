@@ -1,6 +1,4 @@
-"""
-Setup for selenium webdriver.
-"""
+"""Setup for selenium webdriver."""
 import logging
 import logging.config
 import time
