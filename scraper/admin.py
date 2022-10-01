@@ -51,7 +51,7 @@ class URLAdmin(admin.ModelAdmin):
         "gpu",
     )
     ordering = ["log", "gpu"]
-    search_fields = ["gpu"]
+    search_fields = ["gpu__name"]
 
 
 class SaleInline(admin.TabularInline):
