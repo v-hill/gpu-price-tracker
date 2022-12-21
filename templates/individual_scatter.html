@@ -51,10 +51,10 @@
 
 
     </div>
-    <div class="col-lg-9 mt-4">
-        <canvas id="myChart" width="300" height="180"></canvas>
+    <div class="col-lg-9 mt-3">
+        <canvas id="myChart" width="200" height="80"></canvas>
         <script>
-            Chart.defaults.font.size = 15;
+            Chart.defaults.font.size = 16;
             const ctx = document.querySelector("canvas").getContext("2d");
             var ndata = {{ plot_data| safe }};
             var max_price = {{ max_price| safe }};

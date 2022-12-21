@@ -31,32 +31,33 @@ class Command(BaseCommand):
             self.proccess_gpu_model(df, new_df, model)
 
         df2 = pd.DataFrame(new_df)
-        df2 = df2.sort_values(by="price change")
         df2 = df2.sort_values(by="current price")
+        # df2 = df2.sort_values(by="price change")
 
         self.stdout.write(self.style.SUCCESS(str(df2)))
+        self.stdout.write(self.style.SUCCESS(str(df2["price change"].mean())))
 
     def proccess_gpu_model(self, df, new_df, model):
-        september_price = float(
+        last_month_price = float(
             df[
                 (df["gpu__model"] == model)
                 & (df["year"] == 2022)
-                & (df["month"] == 9)
+                & (df["month"] == 11)
             ]["total_price"]
         )
-        october_price = float(
+        this_month_price = float(
             df[
                 (df["gpu__model"] == model)
                 & (df["year"] == 2022)
-                & (df["month"] == 10)
+                & (df["month"] == 12)
             ]["total_price"]
         )
         new_df.append(
             {
                 "model": model,
-                "original price": september_price,
-                "current price": october_price,
-                "price change": (october_price - september_price)
-                / september_price,
+                "original price": last_month_price,
+                "current price": this_month_price,
+                "price change": (this_month_price - last_month_price)
+                / last_month_price,
             }
         )

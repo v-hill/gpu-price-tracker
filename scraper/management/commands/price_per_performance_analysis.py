@@ -35,11 +35,11 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(str(df2)))
 
     def proccess_gpu_model(self, df, new_df, model):
-        september_price = float(
+        month_price = float(
             df[
                 (df["gpu__model"] == model)
                 & (df["year"] == 2022)
-                & (df["month"] == 9)
+                & (df["month"] == 11)
             ]["total_price"]
         )
 
@@ -48,9 +48,9 @@ class Command(BaseCommand):
         new_df.append(
             {
                 "model": model,
-                "current price": september_price,
+                "current price": month_price,
                 "g3d mark median": benchmark,
                 "passmark samples": model.g3d_mark_median,
-                "price/performance": september_price / benchmark,
+                "price/performance": month_price / benchmark,
             }
         )
