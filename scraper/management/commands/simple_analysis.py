@@ -32,7 +32,7 @@ class Command(BaseCommand):
 
         df2 = pd.DataFrame(new_df)
         df2 = df2.sort_values(by="current price")
-        # df2 = df2.sort_values(by="price change")
+        df2 = df2.sort_values(by="price change")
 
         self.stdout.write(self.style.SUCCESS(str(df2)))
         self.stdout.write(self.style.SUCCESS(str(df2["price change"].mean())))
@@ -41,15 +41,15 @@ class Command(BaseCommand):
         last_month_price = float(
             df[
                 (df["gpu__model"] == model)
-                & (df["year"] == 2022)
-                & (df["month"] == 11)
+                & (df["year"] == 2023)
+                & (df["month"] == 1)
             ]["total_price"]
         )
         this_month_price = float(
             df[
                 (df["gpu__model"] == model)
-                & (df["year"] == 2022)
-                & (df["month"] == 12)
+                & (df["year"] == 2023)
+                & (df["month"] == 2)
             ]["total_price"]
         )
         new_df.append(

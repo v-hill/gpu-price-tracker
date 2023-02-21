@@ -105,7 +105,7 @@ class MainWebPage(WebPage):
         if button_css != "":
             menu_button = self.driver.find_element_by_css_selector(button_css)
             menu_button.click()
-            time.sleep(1)
+            time.sleep(2)
 
     def open_all_filter_menu(self):
         soup = self.page_source_soup()
@@ -170,7 +170,7 @@ class MainWebPage(WebPage):
                     f'[id*="{button_id}"]'
                 )
                 option_button.click()
-                time.sleep(1)
+                time.sleep(2)
                 return 1
             except BaseException:
                 time.sleep(1)
@@ -301,7 +301,7 @@ class BrandWebPage(WebPage):
         if self.next_page is not None:
             try:
                 self.driver.get(self.next_page.href)
-                time.sleep(0.5)
+                time.sleep(2)
                 return True
             except BaseException:
                 raise Exception("Could not navigate to next page")

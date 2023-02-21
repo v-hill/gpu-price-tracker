@@ -38,8 +38,8 @@ class Command(BaseCommand):
         month_price = float(
             df[
                 (df["gpu__model"] == model)
-                & (df["year"] == 2022)
-                & (df["month"] == 11)
+                & (df["year"] == 2023)
+                & (df["month"] == 1)
             ]["total_price"]
         )
 

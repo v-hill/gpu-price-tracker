@@ -91,7 +91,7 @@ class EBayItem:
         attributes:
           - title
         """
-        title_class_str = "s-item__title s-item__title--has-tags"
+        title_class_str = "s-item__title"
         try:
             title = self.soup_tag.find(
                 "h3", {"class": re.compile(title_class_str)}
@@ -100,7 +100,7 @@ class EBayItem:
             title = remove_unicode(title)
             self.item_attributes["title"] = title
         except BaseException:
-            logging.debug("no title found")
+            logging.warning("warning: no title found")
             self.item_attributes["title"] = None
 
     def parse_date(self):
@@ -111,7 +111,7 @@ class EBayItem:
           - date
         """
         date_time = self.soup_tag.find(
-            "div", {"class": re.compile("s-item__title-tag")}
+            "div", {"class": re.compile("s-item__bottom")}
         )
         date_time = date_time.text.lower().replace("sold", "").strip()
         date = pd.to_datetime(date_time)

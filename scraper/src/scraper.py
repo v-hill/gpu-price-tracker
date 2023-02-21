@@ -108,7 +108,7 @@ def make_sales_objects(
         "ul", {"class": re.compile("srp-results srp-grid")}
     )
     item_tags = items_container.find_all(
-        "div", {"class": "s-item__wrapper clearfix"}
+        "li", {"class": re.compile("s-item--large")}
     )
     if len(item_tags) == 0:
         raise Exception("No items found on page")
