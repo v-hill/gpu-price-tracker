@@ -56,7 +56,7 @@ def individual_scatter(request):
         search_term = "Select a model"
 
     data = Sale.objects.filter(
-        gpu__id=gpu.id, date__gte=datetime.date(2022, 1, 1)
+        gpu__id=gpu.id, date__gte=datetime.date(2022, 6, 1)
     )
     data = list(data.values_list("date", "total_price"))
     plot_data = [

@@ -30,7 +30,7 @@ class Command(BaseCommand):
             self.proccess_gpu_model(df, new_df, model)
 
         df2 = pd.DataFrame(new_df)
-        df2 = df2.sort_values(by="price/performance")
+        df2 = df2.sort_values(by="performance/price")
 
         self.stdout.write(self.style.SUCCESS(str(df2)))
 
@@ -39,7 +39,7 @@ class Command(BaseCommand):
             df[
                 (df["gpu__model"] == model)
                 & (df["year"] == 2023)
-                & (df["month"] == 1)
+                & (df["month"] == 3)
             ]["total_price"]
         )
 
@@ -51,6 +51,6 @@ class Command(BaseCommand):
                 "current price": month_price,
                 "g3d mark median": benchmark,
                 "passmark samples": model.g3d_mark_median,
-                "price/performance": month_price / benchmark,
+                "performance/price": benchmark / month_price,
             }
         )

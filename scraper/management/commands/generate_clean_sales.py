@@ -81,12 +81,13 @@ class Command(BaseCommand):
             new_sales.append(new_sale)
         return new_sales
 
-    def remove_outliers(self, df):
+    def remove_outliers(self, df, outlier_threshold=3):
         # set flag for upper outliers
         df.loc[
             (
                 df["total_price"]
-                > df["rolling price mean"] + (df["rolling price stdev"]) * 2.5
+                > df["rolling price mean"]
+                + (df["rolling price stdev"]) * outlier_threshold
             )
             & (df["rolling price stdev"] > 0),
             "outlier",
@@ -96,7 +97,8 @@ class Command(BaseCommand):
         df.loc[
             (
                 df["total_price"]
-                < df["rolling price mean"] - (df["rolling price stdev"]) * 2.5
+                < df["rolling price mean"]
+                - (df["rolling price stdev"]) * outlier_threshold
             )
             & (df["rolling price stdev"] > 0),
             "outlier",
@@ -165,6 +167,7 @@ class Command(BaseCommand):
             "needs",
             "but",
             "ryzen",
+            "empty",
         ]
 
         return exclusions_list

@@ -2,6 +2,8 @@
 
 Run this script using `python manage.py simple_analysis`.
 """
+import datetime
+
 import pandas as pd
 from django.core.management.base import BaseCommand
 
@@ -37,21 +39,29 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(str(df2)))
         self.stdout.write(self.style.SUCCESS(str(df2["price change"].mean())))
 
+    def get_month_price(self, df, model, months_before=0):
+        # get current date
+        today = datetime.date.today()
+
+        # calculate target month
+        target_date = today - datetime.timedelta(days=months_before * 30)
+        target_year = target_date.year
+        target_month = target_date.month
+
+        # get month price data
+        month_price = float(
+            df[
+                (df["gpu__model"] == model)
+                & (df["year"] == target_year)
+                & (df["month"] == target_month)
+            ]["total_price"]
+        )
+
+        return month_price
+
     def proccess_gpu_model(self, df, new_df, model):
-        last_month_price = float(
-            df[
-                (df["gpu__model"] == model)
-                & (df["year"] == 2023)
-                & (df["month"] == 1)
-            ]["total_price"]
-        )
-        this_month_price = float(
-            df[
-                (df["gpu__model"] == model)
-                & (df["year"] == 2023)
-                & (df["month"] == 2)
-            ]["total_price"]
-        )
+        last_month_price = self.get_month_price(df, model, months_before=2)
+        this_month_price = self.get_month_price(df, model, months_before=1)
         new_df.append(
             {
                 "model": model,
